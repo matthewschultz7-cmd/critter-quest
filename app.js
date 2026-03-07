@@ -2713,12 +2713,12 @@ function showReadQuestion() {
   if (!q) return;
   R.answered = false;
 
-  const choices = shuffleArr([q.answer, ...q.others]);
+  R.choices = shuffleArr([q.answer, ...q.others]);
   document.getElementById('read-prompt').textContent = q.prompt;
   const hintEl = document.getElementById('read-hint');
   if (hintEl) { hintEl.textContent = q.hint || ''; hintEl.style.display = q.hint ? 'block' : 'none'; }
-  document.getElementById('read-choices').innerHTML = choices.map(c =>
-    `<button class="read-choice-btn" onclick="answerReadQuestion(${JSON.stringify(c)})">${esc(c)}</button>`
+  document.getElementById('read-choices').innerHTML = R.choices.map((c, i) =>
+    `<button class="read-choice-btn" onclick="answerReadQuestion(R.choices[${i}])">${esc(c)}</button>`
   ).join('');
   document.getElementById('read-feedback').textContent = '';
   document.getElementById('read-feedback').className = 'feedback';
