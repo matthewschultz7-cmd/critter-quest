@@ -52,6 +52,7 @@ function showLoadingScreen() {
   const el = document.getElementById('screen-join');
   el.innerHTML = `
     <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
       <div class="logo-big">🐾 Critter Quest</div>
       <div class="join-loading">
         <div class="loading-spinner"></div>
@@ -71,6 +72,7 @@ function showJoinScreen(errorMsg) {
 
   el.innerHTML = `
     <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
       <div class="logo-big">🐾 Critter Quest</div>
       <p class="join-tagline">Math quests for curious kids!</p>
 

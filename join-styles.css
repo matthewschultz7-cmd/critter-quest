@@ -222,3 +222,47 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── Join screen: colorful background ── */
+#screen-join {
+  background: linear-gradient(160deg, #FFF7ED 0%, #ECFDF5 50%, #EFF6FF 100%);
+  min-height: 100vh;
+}
+
+/* ── Bigger, bolder logo on join page ── */
+.join-page .logo-big {
+  font-size: 3.5rem;
+  text-align: center;
+  margin-bottom: 0;
+}
+
+/* ── Bouncing mascot row ── */
+.join-mascot {
+  font-size: 2.8rem;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+  animation: mascot-bounce 2.5s ease-in-out infinite;
+}
+
+@keyframes mascot-bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-10px); }
+}
+
+/* ── Pill-shaped, centered buttons on join page ── */
+.join-page .primary-btn.big {
+  width: auto;
+  min-width: 220px;
+  border-radius: 999px;
+  align-self: center;
+}
+
+/* ── Primary card: green accent border ── */
+.join-card:not(.secondary) {
+  border: 2.5px solid #22C55E;
+}
+
+/* ── Secondary card: slightly muted bg ── */
+.join-card.secondary {
+  background: #F1F5F9;
+}
