@@ -1416,6 +1416,18 @@ function renderStoreAdmin(data) {
           </div>
         </div>
       </div>
+      <div class="add-item-form" style="gap:10px">
+        <h3>🏠 Family Settings</h3>
+        <div class="form-group">
+          <label>Family Join Code</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="form-input" style="flex:1;font-size:1.2rem;font-weight:900;letter-spacing:.08em;text-align:center">${esc(getJoinCode() || '—')}</div>
+            <button class="primary-btn" onclick="copyCode('${esc(getJoinCode() || '')}')" style="white-space:nowrap">📋 Copy</button>
+          </div>
+          <p style="font-size:.8rem;color:#94a3b8;font-weight:700;margin-top:.4rem">Share this with any device to join your family's profiles.</p>
+        </div>
+        <button class="primary-btn" style="width:100%" onclick="showFamilyPickerScreen()">🔄 Switch / Manage Families</button>
+      </div>
     </div>`;
 }
 

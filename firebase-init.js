@@ -156,7 +156,7 @@ function showFamilyPickerScreen() {
     <div class="join-page">
       <div class="join-mascot">🦁 🐸 🦋</div>
       <div class="logo-big">🐾 Critter Quest</div>
-      <p class="join-tagline">Which family are you?</p>
+      <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
       <button class="primary-btn big outline" onclick="showJoinScreen()" style="margin-top:0.5rem">+ Join another family</button>
     </div>`;
