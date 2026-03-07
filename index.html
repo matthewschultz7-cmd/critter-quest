@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Critter Quest 🐾</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Confetti (JS fills this) -->
+  <div id="confetti-box"></div>
+
+  <!-- ── App Header (hidden on profile/join screens) ── -->
+  <header class="app-header" id="app-header" style="display:none">
+    <div class="header-left">
+      <button class="hdr-name-btn" id="hdr-name" title="Change theme">🐾 —</button>
+    </div>
+    <div class="header-center">
+      <button class="hdr-nav-btn" id="hdr-dashboard">🏠 Dashboard</button>
+    </div>
+    <div class="header-right">
+      <button class="hdr-coins-btn" id="hdr-coins">🪙 0</button>
+      <div class="flair-slots" id="hdr-flair">
+        <button class="flair-slot" data-slot="0">+</button>
+        <button class="flair-slot" data-slot="1">+</button>
+        <button class="flair-slot" data-slot="2">+</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Screens ── -->
+  <div id="screen-join"         class="screen active"></div>  <!-- NEW: join/create family -->
+  <div id="screen-profiles"     class="screen"></div>
+  <div id="screen-profile-form" class="screen"></div>
+  <div id="screen-dashboard"    class="screen"></div>
+  <div id="screen-quest-select" class="screen"></div>
+  <div id="screen-quest-game"   class="screen"></div>
+  <div id="screen-quest-done"   class="screen"></div>
+  <div id="screen-inventory"    class="screen"></div>
+  <div id="screen-bank"         class="screen"></div>
+  <div id="screen-store"        class="screen"></div>
+  <div id="screen-store-admin"  class="screen"></div>
+  <div id="screen-themes"       class="screen"></div>
+  <div id="screen-journey"      class="screen"></div>
+
+  <!-- ── Modal overlay ── -->
+  <div id="modal-overlay" class="modal-overlay" style="display:none">
+    <div class="modal-box" id="modal-box"></div>
+  </div>
+
+  <!-- ── Firebase SDKs (v9 compat build) ── -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- ── App scripts ── -->
+  <!-- data.js must load before firebase-init.js -->
+  <script src="data.js"></script>
+  <script src="firebase-init.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
