@@ -266,3 +266,77 @@
 .join-card.secondary {
   background: #F1F5F9;
 }
+
+/* ── Family picker list ── */
+.family-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.family-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+  border: 2px solid transparent;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+
+.family-item:hover {
+  border-color: #22C55E;
+}
+
+.family-item-main {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 1rem 1.25rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-family: 'Nunito', sans-serif;
+}
+
+.family-item-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #1e293b;
+}
+
+.family-item-code {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.family-item-actions {
+  display: flex;
+  gap: 0;
+  border-left: 2px solid #F1F5F9;
+}
+
+.family-action-btn {
+  background: none;
+  border: none;
+  padding: 0 0.9rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #94a3b8;
+  height: 100%;
+  min-height: 56px;
+  transition: background 0.15s, color 0.15s;
+  font-family: 'Nunito', sans-serif;
+}
+
+.family-action-btn:hover {
+  background: #F8FAFC;
+  color: #475569;
+}

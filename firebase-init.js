@@ -28,18 +28,32 @@ const db   = firebase.firestore();
 initFirestore(db);  // hand instance to data.js
 
 // ── App entry point ───────────────────────────
-// Called once Firebase is ready. Tries to restore
-// an existing session; if none, shows the join/create screen.
 async function bootApp() {
   showLoadingScreen();
   try {
-    // Sign in anonymously so Firestore security rules work
     await auth.signInAnonymously();
-    const restored = await tryRestoreSession();
-    if (restored) {
-      nav('profiles');
-    } else {
+
+    // Migration: if old single-family key exists but no known-families list yet,
+    // load that family and register it in the new list.
+    const oldFamilyId = localStorage.getItem('cq_family_id');
+    if (oldFamilyId && getKnownFamilies().length === 0) {
+      const ok = await loadFamily(oldFamilyId);
+      if (ok) {
+        addKnownFamily(oldFamilyId, getJoinCode());
+        nav('profiles');
+        return;
+      }
+    }
+
+    const known = getKnownFamilies();
+    if (known.length === 0) {
       showJoinScreen();
+    } else if (known.length === 1) {
+      const ok = await loadFamily(known[0].familyId);
+      if (ok) { addKnownFamily(known[0].familyId, getJoinCode()); nav('profiles'); }
+      else     { removeKnownFamily(known[0].familyId); showJoinScreen(); }
+    } else {
+      showFamilyPickerScreen();
     }
   } catch (err) {
     console.error('Boot error:', err);
@@ -112,6 +126,98 @@ function showJoinScreen(errorMsg) {
     input.focus();
     input.addEventListener('keydown', e => { if (e.key === 'Enter') handleJoinCode(); });
   }
+}
+
+// ── Family picker (shown when device has 2+ saved families) ───
+function showFamilyPickerScreen() {
+  const families = getKnownFamilies().sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0));
+  const el = document.getElementById('screen-join');
+  el.classList.add('active');
+  document.querySelectorAll('.screen:not(#screen-join)').forEach(s => s.classList.remove('active'));
+  document.getElementById('app-header').style.display = 'none';
+
+  const items = families.map(f => {
+    const label = f.nickname || f.joinCode || 'Family';
+    const sub   = f.nickname && f.joinCode ? f.joinCode : '';
+    return `
+      <div class="family-item">
+        <button class="family-item-main" onclick="enterFamily('${f.familyId}')">
+          <span class="family-item-name">${label}</span>
+          ${sub ? `<span class="family-item-code">${sub}</span>` : ''}
+        </button>
+        <div class="family-item-actions">
+          <button class="family-action-btn" onclick="editFamilyNickname('${f.familyId}','${(f.nickname||'').replace(/'/g,"\\'")}')">✏️</button>
+          <button class="family-action-btn" onclick="deleteFamilyFromDevice('${f.familyId}')">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
+      <div class="logo-big">🐾 Critter Quest</div>
+      <p class="join-tagline">Which family are you?</p>
+      <div class="family-list">${items}</div>
+      <button class="primary-btn big outline" onclick="showJoinScreen()" style="margin-top:0.5rem">+ Join another family</button>
+    </div>`;
+}
+
+async function enterFamily(familyId) {
+  const el = document.getElementById('screen-join');
+  el.innerHTML = `
+    <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
+      <div class="logo-big">🐾 Critter Quest</div>
+      <div class="join-loading"><div class="loading-spinner"></div><p>Loading…</p></div>
+    </div>`;
+  try {
+    const ok = await loadFamily(familyId);
+    if (ok) { addKnownFamily(familyId, getJoinCode()); nav('profiles'); }
+    else    { removeKnownFamily(familyId); showFamilyPickerScreen(); }
+  } catch (err) {
+    console.error('Enter family error:', err);
+    showFamilyPickerScreen();
+  }
+}
+
+function editFamilyNickname(familyId, currentNickname) {
+  showModal(`
+    <div class="modal-title">✏️ Rename Family</div>
+    <p class="modal-text" style="margin-bottom:0.75rem">Give this family a friendly name on this device.</p>
+    <input type="text" id="nickname-input" class="join-input"
+      placeholder="e.g. Our Family" value="${currentNickname}" maxlength="20" />
+    <div class="modal-btns" style="margin-top:1rem">
+      <button class="text-btn" onclick="closeModal()">Cancel</button>
+      <button class="primary-btn" onclick="saveNickname('${familyId}')">Save</button>
+    </div>`);
+  setTimeout(() => document.getElementById('nickname-input')?.select(), 50);
+}
+
+function saveNickname(familyId) {
+  const nickname = (document.getElementById('nickname-input')?.value || '').trim();
+  renameKnownFamily(familyId, nickname);
+  closeModal();
+  showFamilyPickerScreen();
+}
+
+function deleteFamilyFromDevice(familyId) {
+  const f = getKnownFamilies().find(f => f.familyId === familyId);
+  const label = f?.nickname || f?.joinCode || 'this family';
+  showModal(`
+    <div class="modal-title">🗑️ Remove from this device?</div>
+    <p class="modal-text"><strong>${label}</strong> will be removed from this device only. Your family's data in the cloud is safe — you can rejoin anytime with your family code.</p>
+    <div class="modal-btns" style="margin-top:1rem">
+      <button class="text-btn" onclick="closeModal()">Cancel</button>
+      <button class="danger-btn" onclick="confirmDeleteFamily('${familyId}')">Remove</button>
+    </div>`);
+}
+
+function confirmDeleteFamily(familyId) {
+  removeKnownFamily(familyId);
+  closeModal();
+  const remaining = getKnownFamilies();
+  if (remaining.length === 0) showJoinScreen();
+  else showFamilyPickerScreen();
 }
 
 // ── Join code handler ─────────────────────────

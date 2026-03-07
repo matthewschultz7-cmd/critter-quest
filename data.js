@@ -17,6 +17,7 @@
 
 const FAMILY_ID_KEY      = 'cq_family_id';
 const ACTIVE_PROFILE_KEY = 'cq_active_profile';
+const KNOWN_FAMILIES_KEY = 'cq_known_families';
 
 // ── In-memory cache (keeps UI snappy) ─────────
 let _db = {
@@ -38,6 +39,37 @@ function initFirestore(firestoreInstance) {
 // ── Family helpers ────────────────────────────
 function getFamilyId()      { return _db.familyId; }
 function getJoinCode()      { return _db.joinCode; }
+
+// Known-families list (stored locally so the picker works across sessions)
+function getKnownFamilies() {
+  try { return JSON.parse(localStorage.getItem(KNOWN_FAMILIES_KEY) || '[]'); }
+  catch { return []; }
+}
+function _saveKnownFamilies(list) {
+  localStorage.setItem(KNOWN_FAMILIES_KEY, JSON.stringify(list));
+}
+function addKnownFamily(familyId, joinCode) {
+  const list = getKnownFamilies();
+  const existing = list.find(f => f.familyId === familyId);
+  if (existing) {
+    existing.joinCode  = joinCode || existing.joinCode;
+    existing.lastUsed  = Date.now();
+  } else {
+    list.push({ familyId, joinCode: joinCode || '', nickname: '', lastUsed: Date.now() });
+  }
+  _saveKnownFamilies(list);
+}
+function removeKnownFamily(familyId) {
+  _saveKnownFamilies(getKnownFamilies().filter(f => f.familyId !== familyId));
+  if (localStorage.getItem(FAMILY_ID_KEY) === familyId) {
+    localStorage.removeItem(FAMILY_ID_KEY);
+  }
+}
+function renameKnownFamily(familyId, nickname) {
+  const list = getKnownFamilies();
+  const f = list.find(f => f.familyId === familyId);
+  if (f) { f.nickname = nickname; _saveKnownFamilies(list); }
+}
 
 // Generate a friendly join code like "TIGER-42"
 function generateJoinCode() {
@@ -76,6 +108,7 @@ async function createFamily() {
   _db.store     = [];
   _db.profiles  = [];
   localStorage.setItem(FAMILY_ID_KEY, familyId);
+  addKnownFamily(familyId, finalCode);
   return { familyId, joinCode: finalCode };
 }
 
@@ -89,6 +122,7 @@ async function joinFamilyByCode(code) {
   const { familyId } = codeSnap.data();
   await loadFamily(familyId);
   localStorage.setItem(FAMILY_ID_KEY, familyId);
+  addKnownFamily(familyId, clean);
   return { ok: true };
 }
 
