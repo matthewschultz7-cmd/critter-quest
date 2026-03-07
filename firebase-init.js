@@ -137,8 +137,25 @@ async function handleJoinCode() {
 }
 
 // ── Create family handler ─────────────────────
-async function handleCreateFamily() {
-  const btn = document.querySelector('#screen-join .outline');
+// Shows a confirmation screen first so accidental taps can go back
+function handleCreateFamily() {
+  const el = document.getElementById('screen-join');
+  el.innerHTML = `
+    <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
+      <div class="logo-big">🐾 Critter Quest</div>
+      <p class="join-tagline">Math quests for curious kids!</p>
+      <div class="join-card">
+        <div class="join-card-title">✨ Create a new family?</div>
+        <p class="join-card-sub">This makes a brand-new family account. If you already have a family code from another device, go back and use that instead.</p>
+        <button class="primary-btn big" onclick="confirmCreateFamily()">Yes, create new family →</button>
+        <button class="text-btn" onclick="showJoinScreen()" style="align-self:center;margin-top:0.25rem">← Back</button>
+      </div>
+    </div>`;
+}
+
+async function confirmCreateFamily() {
+  const btn = document.querySelector('#screen-join .primary-btn.big');
   if (btn) { btn.textContent = 'Creating…'; btn.disabled = true; }
 
   try {
