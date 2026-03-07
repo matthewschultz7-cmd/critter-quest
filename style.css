@@ -240,9 +240,9 @@ body {
    PROFILE FORM SCREEN
 ───────────────────────────────────────────── */
 /* Grade selector */
-.grade-btns { display: flex; gap: 12px; }
+.grade-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .grade-btn {
-  flex: 1; display: flex; flex-direction: column; align-items: center;
+  display: flex; flex-direction: column; align-items: center;
   gap: 4px; padding: 16px 8px;
   border: 3px solid #E2E8F0; border-radius: 18px;
   background: white; font-family: 'Nunito', sans-serif;
@@ -1008,7 +1008,7 @@ body {
 
   /* Grade btn: hide subtitle to save vertical space */
   .grade-sub { display: none; }
-  .grade-btns{ gap: 8px; }
+  .grade-btns{ gap: 8px; grid-template-columns: 1fr 1fr; }
 
   /* Problem numbers: slightly smaller on mobile */
   .num, .op-sym, .equals, .question-mark { font-size: 2.6rem; }

@@ -15,21 +15,90 @@ const THEMES = {
 const GRADE_CONFIGS = {
   kindergarten: {
     availableOps: ['addition', 'subtraction', 'mixed'],
+    sessionLimit: 3,
     generate: {
-      addition()    { const a = rand(1,9), b = rand(1,10-a);          return { a, b, answer: a+b }; },
-      subtraction() { const a = rand(2,10), b = rand(1,a);            return { a, b, answer: a-b }; },
+      addition()    { const a = rand(1,9), b = rand(1,10-a);                                          return { a, b, answer: a+b }; },
+      subtraction() { const a = rand(2,10), b = rand(1,a);                                            return { a, b, answer: a-b }; },
+    },
+  },
+  grade1: {
+    availableOps: ['addition', 'subtraction', 'mixed'],
+    sessionLimit: 3,
+    generate: {
+      addition()    { const a = rand(1,9), b = rand(1, Math.min(9, 20-a));                            return { a, b, answer: a+b }; },
+      subtraction() { const a = rand(2,20), b = rand(1,a);                                            return { a, b, answer: a-b }; },
+    },
+  },
+  grade2: {
+    availableOps: ['addition', 'subtraction', 'mixed'],
+    sessionLimit: 3,
+    generate: {
+      addition()    { const a = rand(10,99), b = rand(1, Math.min(99, 100-a));                        return { a, b, answer: a+b }; },
+      subtraction() { let a, b; do { a = rand(11,99); b = rand(1,a-1); } while (requiresRegrouping(a,b)); return { a, b, answer: a-b }; },
     },
   },
   grade3: {
     availableOps: ['addition', 'subtraction', 'multiplication', 'division', 'mixed'],
+    sessionLimit: 2,
     generate: {
-      addition()       { const a = rand(10,500), b = rand(10,499);    return { a, b, answer: a+b }; },
+      addition()       { const a = rand(10,500), b = rand(10,499);                                    return { a, b, answer: a+b }; },
       subtraction()    { let a, b; do { a = rand(20,999); b = rand(1,a); } while (requiresRegrouping(a,b)); return { a, b, answer: a-b }; },
-      multiplication() { const a = rand(1,12),   b = rand(1,12);      return { a, b, answer: a*b }; },
-      division()       { const d=rand(1,10), q=rand(1,12);            return { a:d*q, b:d, answer:q }; },
+      multiplication() { const a = rand(1,12),   b = rand(1,12);                                      return { a, b, answer: a*b }; },
+      division()       { const d=rand(1,10), q=rand(1,12);                                            return { a:d*q, b:d, answer:q }; },
+    },
+  },
+  grade4: {
+    availableOps: ['addition', 'subtraction', 'multiplication', 'division', 'mixed'],
+    sessionLimit: 2,
+    generate: {
+      addition()       { const a = rand(100,500), b = rand(100,499);                                  return { a, b, answer: a+b }; },
+      subtraction()    { let a, b; do { a = rand(100,999); b = rand(10,a-10); } while (requiresRegrouping(a,b)); return { a, b, answer: a-b }; },
+      multiplication() { const a = rand(10,99), b = rand(2,9);                                        return { a, b, answer: a*b }; },
+      division()       { const d=rand(2,9), q=rand(10,99);                                            return { a:d*q, b:d, answer:q }; },
+    },
+  },
+  grade5: {
+    availableOps: ['addition', 'subtraction', 'multiplication', 'division', 'mixed'],
+    sessionLimit: 2,
+    generate: {
+      addition()       { const a = rand(100,999), b = rand(100,899);                                  return { a, b, answer: a+b }; },
+      subtraction()    { let a, b; do { a = rand(200,999); b = rand(10,a-10); } while (requiresRegrouping(a,b)); return { a, b, answer: a-b }; },
+      multiplication() { const a = rand(10,99), b = rand(2,12);                                       return { a, b, answer: a*b }; },
+      division()       { const d=rand(2,12), q=rand(10,99);                                           return { a:d*q, b:d, answer:q }; },
+    },
+  },
+  grade6: {
+    availableOps: ['addition', 'subtraction', 'multiplication', 'division', 'mixed'],
+    sessionLimit: 2,
+    generate: {
+      addition()       { const a = rand(-50,50), b = rand(-50,50);                                    return { a, b, answer: a+b }; },
+      subtraction()    { const a = rand(-50,50), b = rand(-50,50);                                    return { a, b, answer: a-b }; },
+      multiplication() { const a = rand(-12,12), b = rand(-12,12);                                    return { a, b, answer: a*b }; },
+      division()       { const s=rand(0,1)?1:-1, d=rand(2,9)*s, q=rand(2,12);                        return { a:d*q, b:d, answer:q }; },
     },
   },
 };
+
+// ── Grade display helpers ──────────────────────
+const GRADE_LABELS = {
+  kindergarten: 'Kindergarten ⭐',
+  grade1: '1st Grade 🌟',
+  grade2: '2nd Grade 🌈',
+  grade3: '3rd Grade 🚀',
+  grade4: '4th Grade ⚡',
+  grade5: '5th Grade 🔥',
+  grade6: '6th Grade 💎',
+};
+
+const GRADE_OPTIONS = [
+  { key: 'kindergarten', emoji: '⭐', name: 'Kindergarten', sub: 'Add &amp; Subtract within 10' },
+  { key: 'grade1',       emoji: '🌟', name: '1st Grade',    sub: 'Add &amp; Subtract within 20' },
+  { key: 'grade2',       emoji: '🌈', name: '2nd Grade',    sub: 'Add &amp; Subtract within 100' },
+  { key: 'grade3',       emoji: '🚀', name: '3rd Grade',    sub: 'All four operations' },
+  { key: 'grade4',       emoji: '⚡', name: '4th Grade',    sub: 'Multi-digit &amp; division' },
+  { key: 'grade5',       emoji: '🔥', name: '5th Grade',    sub: 'Larger numbers &amp; all ops' },
+  { key: 'grade6',       emoji: '💎', name: '6th Grade',    sub: 'Integers &amp; expressions' },
+];
 
 const OPS = {
   addition:       { symbol: '+', accent: '#22C55E', accentLight: '#DCFCE7' },
@@ -38,13 +107,17 @@ const OPS = {
   division:       { symbol: '÷', accent: '#A855F7', accentLight: '#F3E8FF' },
   mixed:          { symbol: '?', accent: '#EC4899', accentLight: '#FCE7F3' },
   // Reading categories
-  'sight-words':   { symbol: '📖', accent: '#8B5CF6', accentLight: '#EDE9FE' },
-  'letter-sounds': { symbol: '🔤', accent: '#0EA5E9', accentLight: '#E0F2FE' },
-  'word-building': { symbol: '🔨', accent: '#F97316', accentLight: '#FFEDD5' },
-  'vocabulary':    { symbol: '📚', accent: '#10B981', accentLight: '#D1FAE5' },
-  'spelling':      { symbol: '✏️', accent: '#06B6D4', accentLight: '#CFFAFE' },
-  'grammar':       { symbol: '📝', accent: '#F59E0B', accentLight: '#FEF3C7' },
-  'read-mixed':    { symbol: '🎲', accent: '#EC4899', accentLight: '#FCE7F3' },
+  'sight-words':       { symbol: '📖', accent: '#8B5CF6', accentLight: '#EDE9FE' },
+  'letter-sounds':     { symbol: '🔤', accent: '#0EA5E9', accentLight: '#E0F2FE' },
+  'word-building':     { symbol: '🔨', accent: '#F97316', accentLight: '#FFEDD5' },
+  'phonics':           { symbol: '🔡', accent: '#14B8A6', accentLight: '#CCFBF1' },
+  'word-families':     { symbol: '🔗', accent: '#F43F5E', accentLight: '#FFE4E6' },
+  'vowel-teams':       { symbol: '🗣️', accent: '#6366F1', accentLight: '#EEF2FF' },
+  'prefixes-suffixes': { symbol: '🧩', accent: '#D946EF', accentLight: '#FAE8FF' },
+  'vocabulary':        { symbol: '📚', accent: '#10B981', accentLight: '#D1FAE5' },
+  'spelling':          { symbol: '✏️', accent: '#06B6D4', accentLight: '#CFFAFE' },
+  'grammar':           { symbol: '📝', accent: '#F59E0B', accentLight: '#FEF3C7' },
+  'read-mixed':        { symbol: '🎲', accent: '#EC4899', accentLight: '#FCE7F3' },
 };
 
 const CORRECT_MSGS = [
@@ -158,7 +231,7 @@ function renderProfiles() {
             <button class="pc-edit-btn" onclick="event.stopPropagation(); nav('profile-form', {editId:'${p.id}'})">✏️</button>
             <div class="pc-critter">${p.themeCreatures[p.theme] || '🐾'}</div>
             <div class="pc-name">${esc(p.name)}</div>
-            <div class="pc-grade">${p.grade === 'grade3' ? '3rd Grade 🚀' : 'Kindergarten ⭐'}</div>
+            <div class="pc-grade">${GRADE_LABELS[p.grade] || 'Student'}</div>
             <div class="pc-theme">${THEMES[p.theme].icon} ${THEMES[p.theme].name}</div>
           </div>
         `).join('')}
@@ -200,16 +273,12 @@ function renderProfileForm(data) {
       <div class="form-group">
         <label>Grade</label>
         <div class="grade-btns">
-          <button class="grade-btn ${_pfGrade==='kindergarten'?'active':''}" id="pf-g-k" onclick="pfGrade('kindergarten')">
-            <span class="grade-emoji">⭐</span>
-            <span class="grade-name">Kindergarten</span>
-            <span class="grade-sub">Add &amp; Subtract within 10</span>
-          </button>
-          <button class="grade-btn ${_pfGrade==='grade3'?'active':''}" id="pf-g-3" onclick="pfGrade('grade3')">
-            <span class="grade-emoji">🚀</span>
-            <span class="grade-name">3rd Grade</span>
-            <span class="grade-sub">All operations &amp; bigger numbers</span>
-          </button>
+          ${GRADE_OPTIONS.map(g => `
+            <button class="grade-btn ${_pfGrade===g.key?'active':''}" data-grade="${g.key}" onclick="pfGrade('${g.key}')">
+              <span class="grade-emoji">${g.emoji}</span>
+              <span class="grade-name">${g.name}</span>
+              <span class="grade-sub">${g.sub}</span>
+            </button>`).join('')}
         </div>
       </div>
       <div class="form-group">
@@ -235,7 +304,7 @@ function renderProfileForm(data) {
 function pfGrade(g) {
   _pfGrade = g;
   document.querySelectorAll('#screen-profile-form .grade-btn').forEach(b =>
-    b.classList.toggle('active', b.id === 'pf-g-' + (g === 'grade3' ? '3' : 'k')));
+    b.classList.toggle('active', b.dataset.grade === g));
 }
 function pfTheme(t) {
   _pfTheme = t;
@@ -360,8 +429,8 @@ function initQuestGame(data) {
   if (!p) { nav('profiles'); return; }
   if (data.resumeOp) G.op = data.resumeOp;
 
-  // Daily op limit: 2 sessions/op for grade3, 3 for kindergarten (only 2 ops available)
-  const _limit  = p.grade === 'kindergarten' ? 3 : 2;
+  // Daily op limit per grade (fewer ops → more sessions per op)
+  const _limit  = GRADE_CONFIGS[p.grade]?.sessionLimit ?? 2;
   const _daily  = getDailyOpCounts(p.id);
   const _avail  = GRADE_CONFIGS[p.grade].availableOps;
   if ((_daily[G.op] || 0) >= _limit) {
@@ -408,7 +477,7 @@ function renderQuestGame() {
       <div class="op-tabs" role="group">
         ${(() => {
           const daily = getDailyOpCounts(p.id);
-          const limit = grade === 'kindergarten' ? 3 : 2;
+          const limit = GRADE_CONFIGS[grade]?.sessionLimit ?? 2;
           return available.map(op => {
             const maxed = (daily[op] || 0) >= limit;
             const label = op==='addition'?'➕ Add':op==='subtraction'?'➖ Sub':op==='multiplication'?'✖️ Mult':op==='division'?'➗ Div':'🎲 Mix';
@@ -492,7 +561,9 @@ function newProblem() {
 // ── Step scaffold rendering ────────────────────
 function buildSteps(grade, opKey, a, b, answer) {
   if (grade === 'kindergarten') return buildKinderSteps(opKey, a, b, answer);
-  return buildGrade3Steps(opKey, a, b, answer);
+  if (grade === 'grade1')       return buildGrade1Steps(opKey, a, b, answer);
+  if (grade === 'grade6')       return buildGrade6Steps(opKey, a, b, answer);
+  return buildGrade3Steps(opKey, a, b, answer); // grades 2, 3, 4, 5
 }
 
 function buildKinderSteps(opKey, a, b, answer) {
@@ -511,6 +582,51 @@ function buildKinderSteps(opKey, a, b, answer) {
   }
   return [{ label: `${a} ${OPS[opKey].symbol} ${b} = ___`, answer, isFinal: true,
     hint: `Try counting on your fingers!` }];
+}
+
+// Grade 1 — Make a Ten (Idaho 1.OA.6) + Think Addition for subtraction
+function buildGrade1Steps(opKey, a, b, answer) {
+  if (opKey === 'addition' || opKey === 'mixed') {
+    const big = Math.max(a, b), small = Math.min(a, b);
+    const partner = 10 - big;
+    if (partner > 0 && small > partner) {
+      // Make a Ten strategy
+      const leftover = small - partner;
+      return [
+        { label: `Make a 10!\n${big} + ___ = 10`,                              answer: partner,  hint: `What number added to ${big} gives you 10?` },
+        { label: `You used ${partner} of the ${small}.\n${small} − ${partner} = ___`, answer: leftover, hint: `${small} take away ${partner} equals?` },
+        { label: `10 + ${leftover} = ___`,                                      answer,           isFinal: true, hint: `Start at 10 and count up ${leftover} more!` },
+      ];
+    }
+    // Count on (sum ≤ 10 or big already ≥ 10)
+    const shown = Array.from({ length: small - 1 }, (_, i) => big + i + 1);
+    const seq   = shown.length ? shown.join(' → ') + ' → ___' : '___';
+    return [{ label: `Start at ${big}. Count on ${small} more:\n${seq}`, answer, isFinal: true,
+      hint: `Hold up ${small} finger${small > 1 ? 's' : ''}. Count up from ${big}!` }];
+  }
+  if (opKey === 'subtraction') {
+    return [{ label: `Think Addition:\n${b} + ___ = ${a}`, answer, isFinal: true,
+      hint: `Count up from ${b} until you reach ${a}. How many steps?` }];
+  }
+  return [{ label: `${a} ${OPS[opKey]?.symbol || '?'} ${b} = ___`, answer, isFinal: true, hint: `Count carefully!` }];
+}
+
+// Grade 6 — Integers (single-step with sign-rule hint)
+function buildGrade6Steps(opKey, a, b, answer) {
+  const sym = OPS[opKey]?.symbol || '?';
+  const hints = {
+    addition:       (a < 0 || b < 0)
+      ? `💡 Same signs → add & keep the sign. Different signs → subtract & keep the bigger sign.`
+      : `💡 Add the values.`,
+    subtraction:    b < 0
+      ? `💡 Subtracting a negative = adding its opposite. ${a} − (${b}) = ${a} + ${Math.abs(b)}`
+      : `💡 Subtract on the number line.`,
+    multiplication: (a < 0) !== (b < 0)
+      ? `💡 Positive × Negative = NEGATIVE.`
+      : `💡 Same signs → POSITIVE result. Multiply the values.`,
+    division:       `💡 Same signs → positive quotient. Different signs → negative quotient.`,
+  };
+  return [{ label: `${a} ${sym} ${b} = ___`, answer, isFinal: true, hint: hints[opKey] || `💡 Calculate carefully!` }];
 }
 
 function buildGrade3Steps(opKey, a, b, answer) {
@@ -921,14 +1037,15 @@ function buildHelpHtml(grade, op, a, b, answer) {
     },
   };
 
-  const gradeKey = grade === 'kindergarten' ? 'kindergarten' : 'grade3';
+  const gradeKey = grade === 'kindergarten' || grade === 'grade1' ? 'kindergarten'
+    : sections[grade] ? grade : 'grade3';
   const opKey    = ['addition','subtraction','multiplication','division'].includes(op) ? op : 'addition';
-  const build    = sections[gradeKey][opKey];
+  const build    = sections[gradeKey]?.[opKey];
   if (!build) return '<p>No help available for this problem.</p>';
   const { strategy, color, steps, visual } = build();
 
   const opLabels = { addition: 'Addition', subtraction: 'Subtraction', multiplication: 'Multiplication', division: 'Division' };
-  const gradeLabel = grade === 'kindergarten' ? 'Kindergarten' : '3rd Grade';
+  const gradeLabel = GRADE_LABELS[grade]?.replace(/\s*[⭐🌟🌈🚀⚡🔥💎]$/, '') || 'Elementary';
 
   return `
     <div class="help-modal">
@@ -983,7 +1100,7 @@ async function finishSession() {
 function selectOp(op) {
   const _p = getActiveProfile();
   if (_p) {
-    const _limit = _p.grade === 'kindergarten' ? 3 : 2;
+    const _limit = GRADE_CONFIGS[_p.grade]?.sessionLimit ?? 2;
     if ((getDailyOpCounts(_p.id)[op] || 0) >= _limit) return;
   }
   G.op = op; G.streak = 0;
@@ -1804,7 +1921,27 @@ const READ_CATS = {
     availableCats: ['sight-words', 'letter-sounds', 'word-building', 'mixed'],
     labels: { 'sight-words': '📖 Sight', 'letter-sounds': '🔤 Sounds', 'word-building': '🔨 Words', 'mixed': '🎲 Mix' },
   },
+  grade1: {
+    availableCats: ['sight-words', 'phonics', 'word-families', 'mixed'],
+    labels: { 'sight-words': '📖 Sight', 'phonics': '🔡 Phonics', 'word-families': '🔗 Families', 'mixed': '🎲 Mix' },
+  },
+  grade2: {
+    availableCats: ['sight-words', 'vowel-teams', 'prefixes-suffixes', 'mixed'],
+    labels: { 'sight-words': '📖 Sight', 'vowel-teams': '🗣️ Vowels', 'prefixes-suffixes': '🧩 Affixes', 'mixed': '🎲 Mix' },
+  },
   grade3: {
+    availableCats: ['vocabulary', 'spelling', 'grammar', 'mixed'],
+    labels: { 'vocabulary': '📚 Vocab', 'spelling': '✏️ Spell', 'grammar': '📝 Grammar', 'mixed': '🎲 Mix' },
+  },
+  grade4: {
+    availableCats: ['vocabulary', 'spelling', 'grammar', 'mixed'],
+    labels: { 'vocabulary': '📚 Vocab', 'spelling': '✏️ Spell', 'grammar': '📝 Grammar', 'mixed': '🎲 Mix' },
+  },
+  grade5: {
+    availableCats: ['vocabulary', 'spelling', 'grammar', 'mixed'],
+    labels: { 'vocabulary': '📚 Vocab', 'spelling': '✏️ Spell', 'grammar': '📝 Grammar', 'mixed': '🎲 Mix' },
+  },
+  grade6: {
     availableCats: ['vocabulary', 'spelling', 'grammar', 'mixed'],
     labels: { 'vocabulary': '📚 Vocab', 'spelling': '✏️ Spell', 'grammar': '📝 Grammar', 'mixed': '🎲 Mix' },
   },
@@ -2015,6 +2152,459 @@ const READ_QUESTIONS = {
     ],
   },
 };
+
+// ── Grade 1–2 reading question banks ───────────
+Object.assign(READ_QUESTIONS, {
+  grade1: {
+    // Dolch Grade 1 sight words (Idaho RF.1.3.c)
+    'sight-words': [
+      { prompt: 'Find the word:\nAFTER',  hint: '💡 "She arrived after dinner."',               answer: 'after',  others: ['often', 'offer', 'afar'] },
+      { prompt: 'Find the word:\nAGAIN',  hint: '💡 "Please read that again!"',                  answer: 'again',  others: ['began', 'begin', 'again'] },
+      { prompt: 'Find the word:\nANY',    hint: '💡 "Do you have any apples?"',                  answer: 'any',    others: ['and', 'ant', 'own'] },
+      { prompt: 'Find the word:\nAS',     hint: '💡 "She ran as fast as she could."',            answer: 'as',     others: ['at', 'an', 'us'] },
+      { prompt: 'Find the word:\nASK',    hint: '💡 "I will ask my teacher."',                   answer: 'ask',    others: ['oak', 'ache', 'ink'] },
+      { prompt: 'Find the word:\nBY',     hint: '💡 "The bag is by the door."',                  answer: 'by',     others: ['be', 'my', 'buy'] },
+      { prompt: 'Find the word:\nCOULD',  hint: '💡 "She could swim very well."',                answer: 'could',  others: ['would', 'cold', 'colds'] },
+      { prompt: 'Find the word:\nEVERY',  hint: '💡 "I brush my teeth every morning."',          answer: 'every',  others: ['even', 'ever', 'event'] },
+      { prompt: 'Find the word:\nFLY',    hint: '💡 "Birds can fly high in the sky."',           answer: 'fly',    others: ['fry', 'sly', 'clay'] },
+      { prompt: 'Find the word:\nFROM',   hint: '💡 "I got a letter from my friend."',           answer: 'from',   others: ['form', 'frog', 'for'] },
+      { prompt: 'Find the word:\nGIVE',   hint: '💡 "Please give me a pencil."',                 answer: 'give',   others: ['live', 'gave', 'vine'] },
+      { prompt: 'Find the word:\nGOING',  hint: '💡 "We are going to the park."',                answer: 'going',  others: ['doing', 'gone', 'goings'] },
+      { prompt: 'Find the word:\nHAD',    hint: '💡 "She had a great idea."',                    answer: 'had',    others: ['has', 'have', 'bad'] },
+      { prompt: 'Find the word:\nHAS',    hint: '💡 "He has a blue backpack."',                  answer: 'has',    others: ['had', 'was', 'his'] },
+      { prompt: 'Find the word:\nHER',    hint: '💡 "This book belongs to her."',                answer: 'her',    others: ['here', 'there', 'him'] },
+      { prompt: 'Find the word:\nHIM',    hint: '💡 "Give the ball to him."',                    answer: 'him',    others: ['his', 'hit', 'hid'] },
+      { prompt: 'Find the word:\nHIS',    hint: '💡 "That is his lunchbox."',                    answer: 'his',    others: ['hers', 'him', 'this'] },
+      { prompt: 'Find the word:\nHOW',    hint: '💡 "How did you do that?"',                     answer: 'how',    others: ['now', 'wow', 'who'] },
+      { prompt: 'Find the word:\nJUST',   hint: '💡 "I just finished my homework."',             answer: 'just',   others: ['gust', 'bust', 'rust'] },
+      { prompt: 'Find the word:\nKNOW',   hint: '💡 "I know the answer!"',                       answer: 'know',   others: ['now', 'knew', 'knob'] },
+      { prompt: 'Find the word:\nLET',    hint: '💡 "Let me try that again."',                   answer: 'let',    others: ['lot', 'lit', 'net'] },
+      { prompt: 'Find the word:\nLIVE',   hint: '💡 "We live on Oak Street."',                   answer: 'live',   others: ['like', 'lime', 'give'] },
+      { prompt: 'Find the word:\nMAY',    hint: '💡 "May I have a cookie please?"',              answer: 'may',    others: ['say', 'man', 'many'] },
+      { prompt: 'Find the word:\nOF',     hint: '💡 "A cup of water, please."',                  answer: 'of',     others: ['off', 'if', 'or'] },
+      { prompt: 'Find the word:\nOLD',    hint: '💡 "My grandpa is old and wise."',              answer: 'old',    others: ['gold', 'hold', 'told'] },
+      { prompt: 'Find the word:\nONCE',   hint: '💡 "I visited that park once before."',         answer: 'once',   others: ['one', 'ounce', 'dance'] },
+      { prompt: 'Find the word:\nOPEN',   hint: '💡 "Please open the window."',                  answer: 'open',   others: ['oven', 'over', 'upon'] },
+      { prompt: 'Find the word:\nOVER',   hint: '💡 "The bird flew over the tree."',             answer: 'over',   others: ['ever', 'oven', 'offer'] },
+      { prompt: 'Find the word:\nPUT',    hint: '💡 "Put your backpack on the hook."',           answer: 'put',    others: ['but', 'cut', 'gut'] },
+      { prompt: 'Find the word:\nROUND',  hint: '💡 "The Earth is round."',                      answer: 'round',  others: ['found', 'mound', 'wound'] },
+      { prompt: 'Find the word:\nSOME',   hint: '💡 "I would like some grapes."',                answer: 'some',   others: ['home', 'same', 'foam'] },
+      { prompt: 'Find the word:\nSTOP',   hint: '💡 "Stop at the red light."',                   answer: 'stop',   others: ['step', 'shop', 'drop'] },
+      { prompt: 'Find the word:\nTAKE',   hint: '💡 "Take your jacket — it is cold!"',           answer: 'take',   others: ['lake', 'make', 'rake'] },
+      { prompt: 'Find the word:\nTHANK',  hint: '💡 "Thank you for your help!"',                 answer: 'thank',  others: ['think', 'thing', 'tank'] },
+      { prompt: 'Find the word:\nTHEM',   hint: '💡 "I gave the books to them."',                answer: 'them',   others: ['then', 'there', 'the'] },
+      { prompt: 'Find the word:\nTHEN',   hint: '💡 "First wash your hands, then eat."',         answer: 'then',   others: ['them', 'when', 'than'] },
+      { prompt: 'Find the word:\nTHINK',  hint: '💡 "Think before you answer."',                 answer: 'think',  others: ['thing', 'thank', 'thick'] },
+      { prompt: 'Find the word:\nWALK',   hint: '💡 "We walk to school every day."',             answer: 'walk',   others: ['talk', 'wall', 'woke'] },
+      { prompt: 'Find the word:\nWERE',   hint: '💡 "They were at the park."',                   answer: 'were',   others: ['here', 'where', 'we\'re'] },
+      { prompt: 'Find the word:\nWHEN',   hint: '💡 "When does school start?"',                  answer: 'when',   others: ['then', 'where', 'what'] },
+    ],
+    // Long vowels, CVCe, vowel digraphs (Idaho RF.1.3.b-c)
+    'phonics': [
+      { prompt: 'Which word has a LONG A sound?',  hint: '💡 Long A says /ay/ as in: cake, rain, day',   answer: 'cake',  others: ['cap', 'cat', 'cab'] },
+      { prompt: 'Which word has a LONG E sound?',  hint: '💡 Long E says /ee/ as in: tree, feet, meat',  answer: 'tree',  others: ['ten', 'tell', 'tent'] },
+      { prompt: 'Which word has a LONG I sound?',  hint: '💡 Long I says /eye/ as in: bike, kite, pine', answer: 'bike',  others: ['big', 'bit', 'bid'] },
+      { prompt: 'Which word has a LONG O sound?',  hint: '💡 Long O says /oh/ as in: rope, boat, snow',  answer: 'rope',  others: ['hop', 'rob', 'rod'] },
+      { prompt: 'Which word has a LONG U sound?',  hint: '💡 Long U says /yoo/ as in: cube, flute, mule',answer: 'cube',  others: ['cub', 'cup', 'cut'] },
+      { prompt: 'What does the silent E do\nin the word CAKE?',  hint: '💡 Silent E at the end makes the vowel before it say its name!', answer: 'Makes the A say its name /ay/', others: ['Makes the C quiet', 'Adds a new sound', 'Makes the word shorter'] },
+      { prompt: 'Which word uses the AI pattern?', hint: '💡 AI together says /ay/: rain, tail, mail, sail', answer: 'rain',  others: ['ran', 'run', 'rin'] },
+      { prompt: 'Which word uses the AY pattern?', hint: '💡 AY at the end says /ay/: day, play, say, way',  answer: 'play',  others: ['plan', 'plop', 'plot'] },
+      { prompt: 'Which word uses the EE pattern?', hint: '💡 EE together says /ee/: tree, feet, sleep',      answer: 'feet',  others: ['fat', 'fit', 'felt'] },
+      { prompt: 'Which word uses the EA pattern?', hint: '💡 EA together says /ee/: meat, read, seat, beat', answer: 'meat',  others: ['mat', 'met', 'mitt'] },
+      { prompt: 'Which word uses the OA pattern?', hint: '💡 OA together says /oh/: boat, coat, goat, road', answer: 'boat',  others: ['bat', 'bit', 'but'] },
+      { prompt: 'Which word uses the OW pattern?', hint: '💡 OW can say /oh/: snow, blow, show, flow',       answer: 'snow',  others: ['snob', 'snop', 'snap'] },
+      { prompt: 'Sound it out (CVCe):\nP · I · N · E',  hint: '💡 The silent E makes I say /eye/: p-i-n-e = pine', answer: 'pine', others: ['pin', 'pan', 'pen'] },
+      { prompt: 'Sound it out (CVCe):\nH · O · M · E',  hint: '💡 The silent E makes O say /oh/: h-o-m-e = home', answer: 'home', others: ['hom', 'ham', 'hem'] },
+      { prompt: 'Sound it out (CVCe):\nT · U · B · E',  hint: '💡 The silent E makes U say /yoo/: t-u-b-e = tube', answer: 'tube', others: ['tub', 'tab', 'top'] },
+      { prompt: 'Sound it out (CVCe):\nN · A · M · E',  hint: '💡 The silent E makes A say /ay/: n-a-m-e = name', answer: 'name', others: ['nap', 'nab', 'knob'] },
+      { prompt: 'Sound it out (CVCe):\nH · I · D · E',  hint: '💡 The silent E makes I say /eye/: h-i-d-e = hide', answer: 'hide', others: ['hid', 'had', 'head'] },
+      { prompt: 'Sound it out (CVCe):\nR · O · P · E',  hint: '💡 The silent E makes O say /oh/: r-o-p-e = rope', answer: 'rope', others: ['rob', 'rip', 'rap'] },
+      { prompt: 'Which word rhymes with RAIN?',   hint: '💡 Rhyming words share the same ending sound: -ain', answer: 'main',  others: ['man', 'moon', 'mine'] },
+      { prompt: 'Which word rhymes with TREE?',   hint: '💡 Rhyming words share the same ending sound: -ee',  answer: 'bee',   others: ['bat', 'bit', 'bay'] },
+      { prompt: 'Which word rhymes with KITE?',   hint: '💡 Rhyming words share the same ending sound: -ite', answer: 'bite',  others: ['kit', 'cat', 'cute'] },
+      { prompt: 'Which word rhymes with COAT?',   hint: '💡 Rhyming words share the same ending sound: -oat', answer: 'goat',  others: ['got', 'gate', 'gust'] },
+      { prompt: 'Which word has a SHORT vowel?',  hint: '💡 Short vowel = closed in by consonants: cat, sit, hop, run', answer: 'hat',  others: ['hate', 'heat', 'hoot'] },
+      { prompt: 'Which word has a LONG vowel?',   hint: '💡 Long vowel = vowel says its name: cake, feet, kite, bone', answer: 'lake', others: ['lick', 'lock', 'luck'] },
+      { prompt: 'What does the OU pattern say\nin the word CLOUD?', hint: '💡 OU in cloud/out/round = /ow/ (like "ow that hurts!")', answer: '/ow/ as in "out"', others: ['/oh/ as in "boat"', '/oo/ as in "moon"', '/uh/ as in "up"'] },
+    ],
+    // Word families / rimes (Idaho RF.1.2.a-c)
+    'word-families': [
+      { prompt: 'Which word belongs to\nthe -IGHT family?',   hint: '💡 -ight family: night, light, right, fight, sight, might',  answer: 'night',  others: ['nine', 'nice', 'nail'] },
+      { prompt: 'Which word belongs to\nthe -AKE family?',    hint: '💡 -ake family: cake, lake, take, make, rake, wake, bake',    answer: 'lake',   others: ['like', 'luck', 'lock'] },
+      { prompt: 'Which word belongs to\nthe -INE family?',    hint: '💡 -ine family: nine, pine, fine, mine, vine, line, dine',    answer: 'pine',   others: ['pan', 'pen', 'pin'] },
+      { prompt: 'Which word belongs to\nthe -ATE family?',    hint: '💡 -ate family: late, gate, date, rate, plate, skate',        answer: 'gate',   others: ['got', 'gut', 'get'] },
+      { prompt: 'Which word belongs to\nthe -OAT family?',    hint: '💡 -oat family: boat, goat, coat, float, throat',             answer: 'goat',   others: ['got', 'gust', 'gate'] },
+      { prompt: 'Which word rhymes with NIGHT\nand has 5 letters?', hint: '💡 -ight family: light, fight, might, right, sight',    answer: 'light',  others: ['limp', 'lime', 'link'] },
+      { prompt: 'Make a new word!\nChange B in BIKE to L:', hint: '💡 B-ike → L-ike: just swap the first letter!',                 answer: 'like',   others: ['lake', 'loke', 'luke'] },
+      { prompt: 'Make a new word!\nChange C in CAKE to L:', hint: '💡 C-ake → L-ake: swap the first letter!',                      answer: 'lake',   others: ['like', 'luck', 'lack'] },
+      { prompt: 'Make a new word!\nChange H in HAT to B:',  hint: '💡 H-at → B-at: just swap the first letter!',                   answer: 'bat',    others: ['bit', 'but', 'bet'] },
+      { prompt: 'Make a new word!\nChange C in CAT to M:',  hint: '💡 C-at → M-at: swap the first letter!',                        answer: 'mat',    others: ['met', 'mit', 'mut'] },
+      { prompt: 'Which word is in the\n-OT family?',        hint: '💡 -ot family: hot, dot, pot, lot, rot, got, not',              answer: 'pot',    others: ['pat', 'pit', 'put'] },
+      { prompt: 'Which word is in the\n-UN family?',        hint: '💡 -un family: run, fun, sun, bun, gun, nun',                   answer: 'sun',    others: ['sin', 'son', 'seen'] },
+      { prompt: 'Which word is in the\n-ELL family?',       hint: '💡 -ell family: bell, sell, tell, well, fell, yell',            answer: 'bell',   others: ['bill', 'ball', 'bull'] },
+      { prompt: 'Which word is in the\n-INK family?',       hint: '💡 -ink family: pink, sink, link, rink, wink, think',           answer: 'pink',   others: ['pine', 'pint', 'pick'] },
+      { prompt: 'Which word is in the\n-ANG family?',       hint: '💡 -ang family: sang, bang, rang, hang, fang',                  answer: 'sang',   others: ['sand', 'same', 'save'] },
+      { prompt: 'Which word is in the\n-ONG family?',       hint: '💡 -ong family: long, song, strong, belong, wrong',             answer: 'song',   others: ['some', 'sort', 'sole'] },
+      { prompt: 'Which word is in the\n-ACK family?',       hint: '💡 -ack family: back, pack, rack, sack, track, black',          answer: 'pack',   others: ['peak', 'pick', 'poke'] },
+      { prompt: 'Which word is in the\n-OOK family?',       hint: '💡 -ook family: book, look, cook, took, hook, brook',           answer: 'cook',   others: ['coat', 'coil', 'cope'] },
+      { prompt: 'Which word is in the\n-EAT family?',       hint: '💡 -eat family: meat, beat, heat, feat, seat, treat, wheat',    answer: 'heat',   others: ['hat', 'hit', 'hut'] },
+      { prompt: 'Change the middle letter!\nMake PAN into PIN:', hint: '💡 P-A-N → P-I-N: just change the vowel!',                 answer: 'pin',    others: ['pan', 'pen', 'pun'] },
+      { prompt: 'Change the middle letter!\nMake HIT into HAT:', hint: '💡 H-I-T → H-A-T: swap the vowel!',                       answer: 'hat',    others: ['hit', 'hot', 'hut'] },
+      { prompt: 'Which two words rhyme?',                   hint: '💡 Rhyming words share the same ending sounds',                 answer: 'cake / lake',  others: ['cake / cup', 'lake / look', 'cake / back'] },
+      { prompt: 'Which two words rhyme?',                   hint: '💡 Rhyming words share the same ending sounds',                 answer: 'night / right', others: ['night / nine', 'right / rot', 'night / neat'] },
+      { prompt: 'Which two words rhyme?',                   hint: '💡 Rhyming words share the same ending sounds',                 answer: 'sing / ring',  others: ['sing / sink', 'ring / ran', 'sing / song'] },
+      { prompt: 'Which two words rhyme?',                   hint: '💡 Rhyming words share the same ending sounds',                 answer: 'tree / bee',   others: ['tree / trick', 'bee / bay', 'tree / tray'] },
+    ],
+  },
+  grade2: {
+    // Dolch Grade 2 sight words (Idaho RF.2.3.c)
+    'sight-words': [
+      { prompt: 'Find the word:\nALWAYS',  hint: '💡 "She always brushes her teeth."',             answer: 'always',  others: ['already', 'almost', 'also'] },
+      { prompt: 'Find the word:\nAROUND',  hint: '💡 "We walked around the lake."',                 answer: 'around',  others: ['ground', 'found', 'abound'] },
+      { prompt: 'Find the word:\nBECAUSE', hint: '💡 "I smiled because I was happy."',              answer: 'because', others: ['before', 'become', 'below'] },
+      { prompt: 'Find the word:\nBEEN',    hint: '💡 "We have been to that park before."',          answer: 'been',    others: ['bean', 'seen', 'keen'] },
+      { prompt: 'Find the word:\nBEFORE',  hint: '💡 "Wash your hands before dinner."',             answer: 'before',  others: ['below', 'between', 'behind'] },
+      { prompt: 'Find the word:\nBEST',    hint: '💡 "That is my best drawing."',                   answer: 'best',    others: ['rest', 'nest', 'test'] },
+      { prompt: 'Find the word:\nBOTH',    hint: '💡 "Both dogs are friendly."',                    answer: 'both',    others: ['moth', 'cloth', 'broth'] },
+      { prompt: 'Find the word:\nBUY',     hint: '💡 "I want to buy a new book."',                  answer: 'buy',     others: ['by', 'guy', 'bye'] },
+      { prompt: 'Find the word:\nCALL',    hint: '💡 "Please call me when you arrive."',            answer: 'call',    others: ['fall', 'tall', 'wall'] },
+      { prompt: 'Find the word:\nCOLD',    hint: '💡 "It is very cold outside today."',             answer: 'cold',    others: ['gold', 'bold', 'told'] },
+      { prompt: 'Find the word:\nDOES',    hint: '💡 "She does her homework every night."',         answer: 'does',    others: ['goes', 'toes', 'foes'] },
+      { prompt: "Find the word:\nDON'T",  hint: "💡 \"I don't like spiders!\"",                    answer: "don't",   others: ['dont', "didn't", "won't"] },
+      { prompt: 'Find the word:\nFAST',    hint: '💡 "The cheetah runs very fast."',                answer: 'fast',    others: ['last', 'past', 'mast'] },
+      { prompt: 'Find the word:\nFIRST',   hint: '💡 "I was the first one in line."',               answer: 'first',   others: ['thirst', 'burst', 'worst'] },
+      { prompt: 'Find the word:\nFOUND',   hint: '💡 "I found my lost pencil!"',                    answer: 'found',   others: ['round', 'sound', 'bound'] },
+      { prompt: 'Find the word:\nGAVE',    hint: '💡 "She gave me a birthday card."',               answer: 'gave',    others: ['cave', 'save', 'wave'] },
+      { prompt: 'Find the word:\nGOES',    hint: '💡 "He goes to the park on Saturdays."',          answer: 'goes',    others: ['does', 'toes', 'foes'] },
+      { prompt: 'Find the word:\nGREEN',   hint: '💡 "The grass is bright green."',                 answer: 'green',   others: ['greet', 'greed', 'greel'] },
+      { prompt: "Find the word:\nITS",     hint: '💡 "The dog wagged its tail." (belonging)',       answer: 'its',     others: ["it's", 'its\'', 'its,'] },
+      { prompt: 'Find the word:\nMANY',    hint: '💡 "There are many stars in the sky."',           answer: 'many',    others: ['may', 'mane', 'men'] },
+      { prompt: 'Find the word:\nOFF',     hint: '💡 "Please turn off the light."',                 answer: 'off',     others: ['of', 'offer', 'often'] },
+      { prompt: 'Find the word:\nSLEEP',   hint: '💡 "I sleep eight hours every night."',           answer: 'sleep',   others: ['steep', 'sheep', 'seep'] },
+      { prompt: 'Find the word:\nTHEIR',   hint: '💡 "The kids left their backpacks by the door."', answer: 'their',   others: ['there', "they're", 'the'] },
+      { prompt: 'Find the word:\nTHESE',   hint: '💡 "These shoes are too small."',                 answer: 'these',   others: ['those', 'there', 'them'] },
+      { prompt: 'Find the word:\nWOULD',   hint: '💡 "I would love some ice cream."',               answer: 'would',   others: ['could', 'should', 'wood'] },
+    ],
+    // Vowel teams + r-controlled vowels (Idaho RF.2.3.a-b)
+    'vowel-teams': [
+      { prompt: 'What sound does AI make\nin the word RAIN?',  hint: '💡 AI together = /ay/ as in: rain, mail, tail, sail, trail',  answer: '/ay/ — like in "day"',  others: ['/ah/ — like in "cat"', '/ee/ — like in "feet"', '/ih/ — like in "sit"'] },
+      { prompt: 'What sound does AY make\nin the word DAY?',   hint: '💡 AY at the end = /ay/: day, play, say, stay, spray',       answer: '/ay/ — like in "rain"', others: ['/ah/ — like in "cat"', '/oh/ — like in "boat"', '/oo/ — like in "moon"'] },
+      { prompt: 'What sound does EE make\nin the word TREE?',  hint: '💡 EE together = /ee/: tree, feet, sleep, keep, green',      answer: '/ee/ — like in "me"',   others: ['/ay/ — like in "day"', '/eh/ — like in "bed"', '/oh/ — like in "boat"'] },
+      { prompt: 'What sound does EA make\nin the word MEAT?',  hint: '💡 EA together usually = /ee/: meat, read, seat, beach',     answer: '/ee/ — like in "tree"', others: ['/ay/ — like in "day"', '/uh/ — like in "up"', '/ah/ — like in "cat"'] },
+      { prompt: 'What sound does OA make\nin the word BOAT?',  hint: '💡 OA together = /oh/: boat, coat, goat, float, road',      answer: '/oh/ — like in "no"',   others: ['/aw/ — like in "saw"', '/oo/ — like in "moon"', '/ow/ — like in "cow"'] },
+      { prompt: 'What sound does OW make\nin SNOW?',          hint: '💡 OW can say /oh/ in: snow, blow, flow, glow, show',       answer: '/oh/ — like in "boat"', others: ['/ow/ — like in "cow"', '/oo/ — like in "moon"', '/aw/ — like in "saw"'] },
+      { prompt: 'What sound does OW make\nin COW?',           hint: '💡 OW can say /ow/ in: cow, now, how, plow, crowd',         answer: '/ow/ — like in "out"',  others: ['/oh/ — like in "snow"', '/oo/ — like in "moon"', '/ah/ — like in "cat"'] },
+      { prompt: 'What sound does OI make\nin COIN?',          hint: '💡 OI together = /oy/: coin, oil, boil, foil, join, point', answer: '/oy/ — like in "boy"',  others: ['/oh/ — like in "boat"', '/ee/ — like in "tree"', '/oo/ — like in "moon"'] },
+      { prompt: 'What sound does OY make\nin BOY?',           hint: '💡 OY at the end = /oy/: boy, joy, toy, enjoy, destroy',   answer: '/oy/ — like in "coin"', others: ['/oh/ — like in "boat"', '/oo/ — like in "moon"', '/ay/ — like in "day"'] },
+      { prompt: 'What sound does OU make\nin CLOUD?',         hint: '💡 OU = /ow/ in: cloud, out, round, found, sound',         answer: '/ow/ — like in "cow"',  others: ['/oh/ — like in "boat"', '/oo/ — like in "moon"', '/uh/ — like in "up"'] },
+      { prompt: 'What does AR sound like\nin the word CAR?',  hint: '💡 AR = r-controlled vowel: car, star, farm, hard, yard',  answer: '/ar/ — like in "star"', others: ['/air/ — like in "hair"', '/or/ — like in "corn"', '/er/ — like in "her"'] },
+      { prompt: 'What does ER sound like\nin the word HER?',  hint: '💡 ER = r-controlled vowel: her, fern, verb, stern, perch', answer: '/er/ — like in "bird"', others: ['/ar/ — like in "car"', '/or/ — like in "corn"', '/air/ — like in "hair"'] },
+      { prompt: 'What does IR sound like\nin the word BIRD?', hint: '💡 IR = r-controlled vowel: bird, girl, shirt, first, third', answer: '/er/ — like in "her"', others: ['/ar/ — like in "car"', '/or/ — like in "corn"', '/igh/ — like in "night"'] },
+      { prompt: 'What does OR sound like\nin the word CORN?', hint: '💡 OR = r-controlled vowel: corn, born, fork, horn, storm', answer: '/or/ — like in "for"',  others: ['/ar/ — like in "car"', '/er/ — like in "her"', '/oo/ — like in "moon"'] },
+      { prompt: 'What does UR sound like\nin the word FUR?',  hint: '💡 UR = r-controlled vowel: fur, burn, turn, hurt, curve', answer: '/er/ — like in "her"',  others: ['/ar/ — like in "car"', '/or/ — like in "corn"', '/oo/ — like in "moon"'] },
+      { prompt: 'Which word has the AR sound?',  hint: '💡 AR sounds like /ar/: car, jar, star, park, farm',  answer: 'star',  others: ['stir', 'store', 'steer'] },
+      { prompt: 'Which word has the ER sound?',  hint: '💡 ER sounds like /er/: her, fern, serve, stern',     answer: 'fern',  others: ['fun', 'fan', 'fin'] },
+      { prompt: 'Which word has the OR sound?',  hint: '💡 OR sounds like /or/: horn, corn, torn, storm',     answer: 'horn',  others: ['hen', 'hun', 'han'] },
+      { prompt: 'Which word uses the OO pattern\nthat sounds like "moon"?', hint: '💡 OO (long) = /oo/: moon, soon, food, pool, tooth', answer: 'moon',  others: ['man', 'men', 'mon'] },
+      { prompt: 'Which word uses the OO pattern\nthat sounds like "book"?', hint: '💡 OO (short) = /oo/: book, cook, hook, look, took', answer: 'book',  others: ['bake', 'bike', 'broke'] },
+      { prompt: 'Which vowel team is in SLEEP?', hint: '💡 What two vowels are together in sleep? S-L-EE-P',  answer: 'EE',   others: ['EA', 'AI', 'OA'] },
+      { prompt: 'Which vowel team is in GOAT?',  hint: '💡 What two vowels are together in goat? G-OA-T',     answer: 'OA',   others: ['OW', 'OU', 'OI'] },
+      { prompt: 'Which vowel team is in TRAIL?', hint: '💡 What two vowels are together in trail? T-R-AI-L',  answer: 'AI',   others: ['AY', 'EA', 'EE'] },
+      { prompt: 'Which vowel team is in TEACH?', hint: '💡 What two vowels are together in teach? T-EA-CH',   answer: 'EA',   others: ['EE', 'AI', 'OA'] },
+      { prompt: 'Which word has a\nr-controlled vowel?',      hint: '💡 R-controlled vowels: ar, er, ir, or, ur — the R changes the vowel sound!', answer: 'farm', others: ['fame', 'face', 'fake'] },
+    ],
+    // Prefixes and suffixes (Idaho RF.2.3.d, L.2.4.b)
+    'prefixes-suffixes': [
+      { prompt: 'What does UN- mean\nin "unkind"?',         hint: '💡 UN- means "not": unkind = not kind, unhappy = not happy',     answer: 'Not',         others: ['Very', 'Again', 'Before'] },
+      { prompt: 'What does RE- mean\nin "redo"?',           hint: '💡 RE- means "again": redo = do again, rewrite = write again',   answer: 'Again',       others: ['Not', 'Before', 'After'] },
+      { prompt: 'What does PRE- mean\nin "preview"?',       hint: '💡 PRE- means "before": preview = see before, preheat = heat before', answer: 'Before',  others: ['After', 'Again', 'Not'] },
+      { prompt: 'What does -FUL mean\nin "helpful"?',       hint: '💡 -ful means "full of": helpful = full of help, joyful = full of joy', answer: 'Full of', others: ['Without', 'Again', 'Very'] },
+      { prompt: 'What does -LESS mean\nin "hopeless"?',     hint: '💡 -less means "without": hopeless = without hope, fearless = without fear', answer: 'Without', others: ['Full of', 'Again', 'Before'] },
+      { prompt: 'What does -ED mean\nin "jumped"?',         hint: '💡 -ed means it already happened in the past: jumped, walked, played', answer: 'Already happened (past)', others: ['Happening right now', 'Will happen later', 'Happens all the time'] },
+      { prompt: 'What does -ING mean\nin "running"?',       hint: '💡 -ing means happening right now: running, jumping, eating',    answer: 'Happening right now',    others: ['Already happened', 'Will happen later', 'Happens every day'] },
+      { prompt: 'What does -ER mean\nin "faster"?',         hint: '💡 -er compares two things: faster = more fast, taller = more tall', answer: 'More (comparing two things)', others: ['The most of all', 'Without', 'Full of'] },
+      { prompt: 'What does -EST mean\nin "fastest"?',       hint: '💡 -est = the most of all: fastest, tallest, brightest',         answer: 'The most of all',    others: ['Comparing two', 'Without', 'Full of'] },
+      { prompt: 'Add UN- to "happy".\nWhat is the new word?', hint: '💡 UN- + happy = unhappy (means not happy)',                  answer: 'unhappy',     others: ['unhappy', 'nothappy', 'dehappy', 'unhappily'] },
+      { prompt: 'Add RE- to "build".\nWhat is the new word?',  hint: '💡 RE- + build = rebuild (means build again)',               answer: 'rebuild',     others: ['debuld', 'prebuild', 'unbuild'] },
+      { prompt: 'Add -FUL to "color".\nWhat is the new word?', hint: '💡 color + -ful = colorful (means full of color)',           answer: 'colorful',    others: ['coloring', 'colored', 'colorless'] },
+      { prompt: 'Add -LESS to "care".\nWhat is the new word?', hint: '💡 care + -less = careless (means without care)',            answer: 'careless',    others: ['careful', 'caring', 'carer'] },
+      { prompt: 'Which word means\n"do again"?',             hint: '💡 RE- means "again": re + do = redo',                         answer: 'redo',        others: ['undo', 'overdo', 'prodo'] },
+      { prompt: 'Which word means\n"not safe"?',             hint: '💡 UN- means "not": un + safe = unsafe',                       answer: 'unsafe',      others: ['resafe', 'presafe', 'desafe'] },
+      { prompt: 'Which word means\n"full of hope"?',         hint: '💡 hope + -ful = hopeful (full of hope)',                      answer: 'hopeful',     others: ['hopeless', 'hoping', 'hoped'] },
+      { prompt: 'Which word means\n"without power"?',        hint: '💡 power + -less = powerless (without power)',                 answer: 'powerless',   others: ['powerful', 'powering', 'overpower'] },
+      { prompt: 'What is the ROOT WORD\nin "replaying"?',    hint: '💡 Root word = the base word without prefixes/suffixes: re-PLAY-ing', answer: 'play',  others: ['replay', 'replaying', 'playing'] },
+      { prompt: 'What is the ROOT WORD\nin "unhelpful"?',    hint: '💡 Root word = the base word: un-HELP-ful',                   answer: 'help',        others: ['unhelpful', 'helpful', 'helping'] },
+      { prompt: 'Which word has a PREFIX?',                  hint: '💡 A prefix comes BEFORE the root word: un-, re-, pre-, dis-', answer: 'rewrite',     others: ['writing', 'written', 'writes'] },
+      { prompt: 'Which word has a SUFFIX?',                  hint: '💡 A suffix comes AFTER the root word: -ful, -less, -er, -ed, -ing', answer: 'playful', others: ['play', 'replay', 'preplayed'] },
+      { prompt: 'How many syllables\nin "helpful"?',         hint: '💡 Clap it out: HELP-ful = 2 claps = 2 syllables',             answer: '2',           others: ['1', '3', '4'] },
+      { prompt: 'How many syllables\nin "unhappy"?',         hint: '💡 Clap it out: un-HAP-py = 3 claps = 3 syllables',            answer: '3',           others: ['1', '2', '4'] },
+      { prompt: 'Add -LY to "slow".\nWhat is the new word?',  hint: '💡 slow + -ly = slowly (describes HOW something is done)',   answer: 'slowly',      others: ['slowful', 'slowest', 'slower'] },
+      { prompt: 'What does -LY mean\nin "quickly"?',          hint: '💡 -ly turns adjectives into adverbs describing HOW: quickly = in a quick way', answer: 'In that way / how it is done', others: ['Full of', 'Without', 'The most'] },
+    ],
+  },
+});
+
+// ── Grade 4–6 reading question banks ───────────
+Object.assign(READ_QUESTIONS, {
+  grade4: {
+    // Tier 2 academic vocabulary + context clues (Idaho L.4.4, L.4.6)
+    'vocabulary': [
+      { prompt: 'What does "analyze" mean?',      hint: '💡 "Scientists analyze data carefully to find patterns in their experiments."',       answer: 'To study something carefully to understand it',   others: ['To ignore something', 'To break something apart physically', 'To describe something quickly'] },
+      { prompt: 'What does "conclude" mean?',     hint: '💡 "After reading the evidence, she concluded the experiment was a success."',        answer: 'To reach a decision after careful thought',       others: ['To begin something', 'To disagree with someone', 'To make a mistake'] },
+      { prompt: 'What does "sufficient" mean?',   hint: '💡 "She had sufficient supplies to complete the project before the deadline."',       answer: 'Enough for what is needed',                       others: ['Far too much', 'Not nearly enough', 'Exactly perfect'] },
+      { prompt: 'What does "contribute" mean?',   hint: '💡 "Each student contributed ideas to the group project."',                          answer: 'To give or add to something',                     others: ['To take away from something', 'To finish something', 'To argue about something'] },
+      { prompt: 'What does "significant" mean?',  hint: '💡 "The discovery was significant — it changed everything scientists believed."',    answer: 'Important or meaningful',                         others: ['Very small and unimportant', 'Hard to see or find', 'Simple and easy'] },
+      { prompt: 'What does "interpret" mean?',    hint: '💡 "Can you interpret what this graph is showing us?"',                              answer: 'To explain the meaning of something',             others: ['To copy something exactly', 'To erase something', 'To predict the future'] },
+      { prompt: 'What does "demonstrate" mean?',  hint: '💡 "The teacher demonstrated the experiment step by step so we could follow."',     answer: 'To show how something is done',                   others: ['To hide how something works', 'To ask a question about something', 'To write about something'] },
+      { prompt: 'What does "evaluate" mean?',     hint: '💡 "The judges will evaluate each student\'s science fair project carefully."',     answer: 'To judge the value or quality of something',      others: ['To ignore something', 'To copy something', 'To build something new'] },
+      { prompt: 'What does "technique" mean?',    hint: '💡 "She used a special painting technique to blend the colors perfectly."',         answer: 'A specific way of doing something skillfully',    others: ['A type of tool or machine', 'A kind of material', 'A location or place'] },
+      { prompt: 'What does "consequence" mean?',  hint: '💡 "Leaving food out had a serious consequence — ants came in!"',                  answer: 'A result or outcome of an action',                others: ['A type of question', 'A beginning or start', 'A reason for doing something'] },
+      { prompt: 'What does "perspective" mean?',  hint: '💡 "From a bird\'s perspective, the neighborhood looks like a tiny patchwork."',    answer: 'A particular point of view or way of seeing',    others: ['A type of measurement', 'A kind of color', 'A style of clothing'] },
+      { prompt: 'What does "transform" mean?',    hint: '💡 "The caterpillar transforms into a beautiful butterfly."',                       answer: 'To change completely in form or nature',          others: ['To stay exactly the same', 'To become smaller', 'To travel to a new place'] },
+      { prompt: 'What does "relevant" mean?',     hint: '💡 "Make sure your details are relevant to the main topic of your essay."',        answer: 'Directly connected to the topic at hand',        others: ['Far off topic', 'Very interesting', 'Difficult to understand'] },
+      { prompt: 'What does "acquire" mean?',      hint: '💡 "Over time, she acquired many new skills by practicing every day."',            answer: 'To gain or obtain something over time',           others: ['To lose something slowly', 'To give something away', 'To break something apart'] },
+      { prompt: 'What does "efficient" mean?',    hint: '💡 "The efficient worker finished her tasks quickly without wasting any time."',    answer: 'Getting things done without wasting time or effort', others: ['Doing things slowly and carefully', 'Making many mistakes', 'Working alone'] },
+      { prompt: 'What does "precise" mean?',      hint: '💡 "The engineer made precise measurements — every millimeter counted."',          answer: 'Exact and accurate, without error',               others: ['Rough and approximate', 'Very large and broad', 'Simple and basic'] },
+      { prompt: 'What does "establish" mean?',    hint: '💡 "The settlers worked hard to establish a new community in the wilderness."',    answer: 'To set up or create something firmly',            others: ['To destroy something completely', 'To move somewhere', 'To find something lost'] },
+      { prompt: 'What does "identify" mean?',     hint: '💡 "Can you identify which rock is granite and which is limestone?"',             answer: 'To recognize and name something',                 others: ['To hide or disguise something', 'To measure something', 'To sort things by size'] },
+      { prompt: 'What does "examine" mean?',      hint: '💡 "The doctor examined the patient carefully to check for any problems."',        answer: 'To look at or study something very carefully',    others: ['To glance at quickly', 'To destroy or remove', 'To guess without looking'] },
+      { prompt: 'What does "influence" mean?',    hint: '💡 "A good book can influence the way you think about the world."',               answer: 'To have an effect on someone or something',       others: ['To have no effect at all', 'To push something away', 'To completely change direction'] },
+      { prompt: 'What does "justify" mean?',      hint: '💡 "She had to justify her answer by explaining her reasoning clearly."',         answer: 'To give reasons to support a decision or action', others: ['To apologize for being wrong', 'To change your mind', 'To avoid answering'] },
+      { prompt: 'What does "structure" mean?',    hint: '💡 "A good essay has a clear structure: introduction, body, and conclusion."',    answer: 'The way something is organized or built',         others: ['The color of something', 'The length of something', 'The age of something'] },
+      { prompt: 'What does "obtain" mean?',       hint: '💡 "You need a library card to obtain books from the public library."',           answer: 'To get or receive something',                     others: ['To give something away', 'To break something apart', 'To hide something away'] },
+      { prompt: 'What does "determine" mean?',    hint: '💡 "The detective tried to determine the cause of the mysterious sound."',        answer: 'To find out or decide something',                 others: ['To ignore a problem', 'To create something from scratch', 'To celebrate something'] },
+      { prompt: 'What does "support" mean\n(in writing)?', hint: '💡 "Use evidence from the text to support your argument."',              answer: 'To back up an idea with evidence or reasons',    others: ['To disagree with an idea', 'To delete part of your writing', 'To start a new paragraph'] },
+    ],
+    // Homophones, spelling patterns (Idaho L.4.2.d)
+    'spelling': [
+      { prompt: 'Choose the correct word:\n"Put the book over ___ on the shelf."', hint: '💡 "there" = a place. "their" = belonging to them. "they\'re" = they are.', answer: 'there', others: ['their', "they're", 'thare'] },
+      { prompt: 'Choose the correct word:\n"___ backpacks are on the hook."',      hint: '💡 "Their" = belonging to them (possessive).', answer: 'Their', others: ['There', "They're", 'Thier'] },
+      { prompt: 'Choose the correct word:\n"___ going to the science fair!"',       hint: '💡 "They\'re" = they are (contraction).', answer: "They're", others: ['Their', 'There', 'Theyre'] },
+      { prompt: 'Choose the correct word:\n"I want ___ go to the movies."',         hint: '💡 "to" = direction or purpose. "too" = also/very. "two" = the number 2.', answer: 'to', others: ['too', 'two', 'tow'] },
+      { prompt: 'Choose the correct word:\n"Can I come ___ ?"',                     hint: '💡 "too" means also or as well.', answer: 'too', others: ['to', 'two', 'tow'] },
+      { prompt: 'Choose the correct word:\n"I have ___ dogs."',                     hint: '💡 "two" = the number 2.', answer: 'two', others: ['too', 'to', 'tow'] },
+      { prompt: 'Choose the correct word:\n"Is that ___ lunchbox?"',                hint: '💡 "your" = belonging to you. "you\'re" = you are.', answer: 'your', others: ["you're", 'yore', 'yor'] },
+      { prompt: 'Choose the correct word:\n"___ going to love this book!"',         hint: '💡 "you\'re" = you are (contraction).', answer: "You're", others: ['Your', 'Yore', 'Youre'] },
+      { prompt: 'Choose the correct word:\n"The dog wagged ___ tail."',             hint: '💡 "its" = belonging to it. "it\'s" = it is.', answer: 'its', others: ["it's", 'its\'', 'its,'] },
+      { prompt: 'Choose the correct word:\n"___ raining outside today."',           hint: '💡 "It\'s" = it is (contraction).', answer: "It's", others: ['Its', "Its'", 'Itss'] },
+      { prompt: 'Choose the correct word:\n"She is taller ___ her brother."',       hint: '💡 "than" compares two things. "then" means after that.', answer: 'than', others: ['then', 'then,', 'thane'] },
+      { prompt: 'Choose the correct word:\n"Finish dinner, ___ you can play."',     hint: '💡 "then" means after that or next in time.', answer: 'then', others: ['than', 'when', 'than,'] },
+      { prompt: 'Choose the correct word:\n"The weather ___ how I feel."',          hint: '💡 "affects" (verb) = has an effect on. "effects" (noun) = the results.', answer: 'affects', others: ['effects', 'affectes', 'efectts'] },
+      { prompt: 'Choose the correct word:\n"The ___ of the storm were terrible."',  hint: '💡 "effects" (noun) = the results or outcomes.', answer: 'effects', others: ['affects', 'affectes', 'efects'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'necessary',   hint: '💡 One C, two S\'s: ne-C-es-S-ary. "One collar, two socks!"',   others: ['neccessary', 'neccesary', 'necesary'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'beginning',   hint: '💡 begin → beginning: double the N before -ing',                 others: ['begining', 'beggining', 'biginning'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'separate',    hint: '💡 sep-ar-ate: there\'s "a rat" in sep-A-RAT-e!',                others: ['seperate', 'seperrate', 'separete'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'definitely',  hint: '💡 definite + ly: de-FIN-ite-ly (not "defin-A-tely")',           others: ['definately', 'definitly', 'defenitely'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'government',  hint: '💡 govern + ment: the "n" is in govern-N-ment',                  others: ['goverment', 'govenment', 'governement'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'environment', hint: '💡 environ + ment: envir-ON-ment (not "envirnment")',            others: ['enviroment', 'enviornment', 'enviorment'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'explanation', hint: '💡 explain → explanation (not "explaination")',                  others: ['explaination', 'explination', 'explantion'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'conscience',  hint: '💡 con-science: the "science" is right there in the word!',      others: ['consciense', 'consience', 'consciene'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'especially',  hint: '💡 e-SPECIAL-ly: "special" is hiding inside!',                  others: ['especialy', 'expecially', 'espesially'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'weird',       hint: '💡 "Weird" breaks the i-before-e rule: w-EI-rd',                others: ['wierd', 'weerd', 'wired'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'achieve',     hint: '💡 i before e except after c: ach-IE-ve',                       others: ['acheive', 'achive', 'acheeve'] },
+    ],
+    // Complex grammar: relative pronouns, verb tenses, complex sentences (Idaho L.4.1)
+    'grammar': [
+      { prompt: 'Which pronoun completes the sentence?\n"The student ___ won the prize was thrilled."', hint: '💡 Use "who" for people, "that/which" for things.',             answer: 'who',   others: ['which', 'what', 'whose'] },
+      { prompt: 'Which pronoun completes the sentence?\n"The book ___ I read was amazing."',           hint: '💡 Use "that" or "which" for things, not people.',               answer: 'that',  others: ['who', 'whom', 'what'] },
+      { prompt: 'Which pronoun completes the sentence?\n"The park, ___ opens at 9, is nearby."',      hint: '💡 "which" adds extra information about a thing.',                answer: 'which', others: ['who', 'that', 'what'] },
+      { prompt: '"She has eaten breakfast."\nThis sentence is in the ___ tense.',                      hint: '💡 has/have + past participle = present perfect tense',           answer: 'present perfect',  others: ['simple past', 'future', 'past continuous'] },
+      { prompt: '"They had finished before I arrived."\nThis uses the ___ tense.',                     hint: '💡 had + past participle = past perfect (happened before another past event)', answer: 'past perfect', others: ['present perfect', 'simple past', 'future perfect'] },
+      { prompt: 'Which sentence uses a RELATIVE ADVERB correctly?',                                    hint: '💡 Relative adverbs: where (place), when (time), why (reason)',   answer: 'That is the house where I grew up.', others: ['That is the house who I grew up.', 'That is the house which I grew up.', 'That is the house when I grew up.'] },
+      { prompt: '"Could" in a sentence shows:',                                                        hint: '💡 Modal auxiliary verbs show possibility, ability, permission.',   answer: 'Ability or possibility in the past', others: ['Something that must happen', 'Something that will definitely happen', 'Something happening right now'] },
+      { prompt: 'Which sentence uses a PREPOSITIONAL PHRASE?',                                         hint: '💡 Prepositional phrases begin with: in, on, at, by, under, above, near…', answer: 'The cat slept under the warm blanket.', others: ['The cat slept quickly.', 'The cat quickly slept.', 'The cat was sleeping.'] },
+      { prompt: 'Which sentence is COMPOUND?',                                                         hint: '💡 Compound sentence = two independent clauses joined by a conjunction (and, but, or, so)', answer: 'I like hiking, and my sister likes swimming.', others: ['I like hiking in the woods.', 'Because I like hiking, I bought boots.', 'I like hiking more than swimming.'] },
+      { prompt: 'Which sentence is COMPLEX?',                                                          hint: '💡 Complex sentence = independent clause + dependent clause (because, when, if, although…)', answer: 'Because it was raining, we stayed inside.', others: ['It was raining and we stayed inside.', 'We stayed inside all day long.', 'It was raining; we stayed inside.'] },
+      { prompt: '"Although she was tired, she finished her homework."\nWhat type of sentence is this?', hint: '💡 "Although" starts a dependent clause — this is a complex sentence.', answer: 'Complex', others: ['Simple', 'Compound', 'Compound-complex'] },
+      { prompt: 'Which is the correct PAST TENSE of "swim"?',                                          hint: '💡 Swim is an irregular verb: swim → swam (not "swimmed")',        answer: 'swam',  others: ['swimmed', 'swum', 'swammed'] },
+      { prompt: 'Which is the correct PAST TENSE of "bring"?',                                        hint: '💡 Bring is irregular: bring → brought (not "bringed")',           answer: 'brought', others: ['brang', 'bringed', 'brung'] },
+      { prompt: 'Which is the correct PAST TENSE of "grow"?',                                         hint: '💡 Grow is irregular: grow → grew (not "growed")',                answer: 'grew',  others: ['growed', 'grown', 'grewn'] },
+      { prompt: 'Which sentence uses CORRECT punctuation\nwith an appositive?',                        hint: '💡 Appositives (renaming phrases) are set off by commas: "My dog, Rex, loves to run."', answer: 'My teacher, Mrs. Smith, is very kind.', others: ['My teacher Mrs. Smith is very kind.', 'My teacher, Mrs. Smith is very kind.', 'My teacher Mrs. Smith, is very kind.'] },
+      { prompt: 'Which word is an ADVERB in:\n"She quietly read her book."',                           hint: '💡 Adverbs describe HOW something is done. Look for -ly words.',   answer: 'quietly', others: ['She', 'read', 'book'] },
+      { prompt: 'Which sentence avoids\na DOUBLE NEGATIVE?',                                           hint: '💡 Double negatives cancel out. Use only one negative word per thought.', answer: 'I don\'t have any money.', others: ["I don't have no money.", "I haven't got no money.", "I don't got nothing."] },
+      { prompt: 'In "The dog bit the boy,"\nwhat is the DIRECT OBJECT?',                               hint: '💡 Direct object = WHO or WHAT receives the action of the verb.',  answer: 'boy',   others: ['dog', 'bit', 'the'] },
+      { prompt: 'Which sentence uses\ncorrect SUBJECT-VERB AGREEMENT?',                                hint: '💡 A singular subject needs a singular verb (is, was, has, does).',  answer: 'Everyone is excited for the trip.', others: ['Everyone are excited for the trip.', 'Everyone were excited for the trip.', 'Everyone have been excited for the trip.'] },
+      { prompt: 'Which word is a CONJUNCTION\nin "I wanted pizza, but we had tacos."?',                hint: '💡 Coordinating conjunctions join two independent clauses: FANBOYS (For, And, Nor, But, Or, Yet, So)', answer: 'but', others: ['pizza', 'wanted', 'had'] },
+      { prompt: '"It was the most exciting game I had ever seen!"\nWhich verb tense is "had ever seen"?', hint: '💡 had + past participle = past perfect (action completed before another past moment)', answer: 'Past perfect', others: ['Present perfect', 'Simple past', 'Past continuous'] },
+      { prompt: 'Which sentence has an ERROR\nin pronoun use?',                                        hint: '💡 Subject pronouns: I, he, she, we, they. Object pronouns: me, him, her, us, them.', answer: 'Her and me went to the park.', others: ['She and I went to the park.', 'She and I walked together.', 'She went with me to the park.'] },
+      { prompt: 'Which is a DEPENDENT clause?',                                                        hint: '💡 Dependent clauses cannot stand alone — they start with: because, when, if, although, since…', answer: 'because the storm was coming', others: ['The storm was coming.', 'We went inside.', 'It started to rain hard.'] },
+      { prompt: 'Which sentence uses\nCORRECT capitalization?',                                        hint: '💡 Capitalize proper nouns: specific people, places, holidays, titles.', answer: 'We visited the Lincoln Memorial in Washington, D.C.', others: ['We visited the lincoln memorial in washington, d.c.', 'We visited The Lincoln memorial in Washington, D.C.', 'we visited the Lincoln Memorial in washington, D.C.'] },
+      { prompt: 'What mark goes at the end of:\n"What time does the movie start"',                     hint: '💡 Questions end with a question mark ?',                          answer: '?',     others: ['.', '!', ';'] },
+    ],
+  },
+  grade5: {
+    // Greek/Latin roots + academic vocabulary (Idaho L.5.4.b-c, L.5.6)
+    'vocabulary': [
+      { prompt: 'What does the Latin root "PORT" mean?\n(as in transport, portable, import)', hint: '💡 transport = carry across, portable = able to be carried, import = carry in', answer: 'To carry',        others: ['To open', 'To send messages', 'To measure'] },
+      { prompt: 'What does the Greek root "BIO" mean?\n(as in biology, biography, biome)',   hint: '💡 biology = study of life, biography = writing about a life',                  answer: 'Life',            others: ['Earth', 'Water', 'Study of'] },
+      { prompt: 'What does the Greek root "GEO" mean?\n(as in geography, geology, geometry)',hint: '💡 geography = writing about the earth, geology = study of earth',               answer: 'Earth',           others: ['Life', 'Water', 'Light'] },
+      { prompt: 'What does the Latin root "AUD" mean?\n(as in auditorium, audio, audience)', hint: '💡 auditorium = place to hear, audience = people who hear/watch',               answer: 'To hear',         others: ['To see', 'To speak', 'To think'] },
+      { prompt: 'What does the Latin root "VIS" mean?\n(as in visible, vision, visual)',     hint: '💡 visible = able to be seen, vision = ability to see',                         answer: 'To see',          others: ['To hear', 'To touch', 'To carry'] },
+      { prompt: 'What does the Latin root "DICT" mean?\n(as in dictate, dictionary, predict)',hint: '💡 dictate = to speak, dictionary = book of words, predict = say before',      answer: 'To say or speak', others: ['To write', 'To hear', 'To carry'] },
+      { prompt: 'What does the Greek root "GRAPH" mean?\n(as in photograph, autograph, paragraph)', hint: '💡 photograph = light-writing, autograph = self-writing',              answer: 'To write',        others: ['To read', 'To draw', 'To speak'] },
+      { prompt: 'What does the Greek root "TELE" mean?\n(as in telephone, telescope, television)', hint: '💡 telephone = far-away sound, telescope = see from far away',            answer: 'Far away',        others: ['Very small', 'Very large', 'Very fast'] },
+      { prompt: 'What does the Latin root "STRUCT" mean?\n(as in construct, structure, instruct)', hint: '💡 construct = build together, structure = something built',             answer: 'To build',        others: ['To destroy', 'To measure', 'To paint'] },
+      { prompt: 'What does the Latin root "SCRIB/SCRIPT" mean?\n(as in describe, script, inscription)', hint: '💡 describe = write about, script = written words, inscription = written on', answer: 'To write', others: ['To read', 'To speak', 'To build'] },
+      { prompt: 'What does "infer" mean?',       hint: '💡 "Based on the clues, I could infer that the character was nervous."',            answer: 'To conclude from evidence without being directly told', others: ['To memorize the exact words', 'To guess randomly', 'To look something up'] },
+      { prompt: 'What does "synthesize" mean?',  hint: '💡 "She synthesized information from three different sources into one clear summary."', answer: 'To combine information from multiple sources',       others: ['To separate ideas apart', 'To copy exactly', 'To ignore some information'] },
+      { prompt: 'What does "elaborate" mean?',   hint: '💡 "Please elaborate on your answer — I want to know more details!"',               answer: 'To add more detail or explanation',                 others: ['To shorten your answer', 'To change your answer', 'To ask a question'] },
+      { prompt: 'What does "relevant" mean?',    hint: '💡 "Only include details that are relevant to the main topic of your essay."',      answer: 'Directly connected and important to the topic',     others: ['Interesting but off-topic', 'Very confusing', 'Hard to understand'] },
+      { prompt: 'What does "alternative" mean?', hint: '💡 "If the highway is blocked, take an alternative route to avoid traffic."',       answer: 'Another option or choice',                          others: ['The only possible way', 'The most expensive option', 'A type of road'] },
+      { prompt: 'What does "contradict" mean?',  hint: '💡 "The second witness contradicted the first by saying the opposite happened."',   answer: 'To say or do the opposite of something',            others: ['To agree completely', 'To explain something clearly', 'To ask for more time'] },
+      { prompt: 'What does "imply" mean?',       hint: '💡 "Her smile implied she was happy, even though she never said a word."',         answer: 'To suggest something without saying it directly',   others: ['To say something loudly and clearly', 'To deny something', 'To write something down'] },
+      { prompt: 'What does "consequence" mean?', hint: '💡 "One consequence of not studying is doing poorly on the test."',                 answer: 'A result or effect of an action',                   others: ['A reason for doing something', 'A type of question', 'A reward for good work'] },
+      { prompt: 'What does "reliable" mean?',    hint: '💡 "A reliable source gives you accurate information you can trust."',             answer: 'Can be trusted to be accurate and consistent',      others: ['Very difficult to find', 'Very exciting to read', 'Always changing'] },
+      { prompt: 'What does "chronological" mean?', hint: '💡 "The events are told in chronological order — from earliest to latest."',    answer: 'Arranged in order of time, from earliest to latest', others: ['Arranged by importance', 'Arranged alphabetically', 'Arranged by size'] },
+      { prompt: 'What does "objective" mean?\n(in writing)',  hint: '💡 "A news reporter should be objective and not show personal opinions."', answer: 'Based on facts, not personal feelings or opinions', others: ['Based on personal feelings only', 'Very exciting and dramatic', 'Very long and detailed'] },
+      { prompt: 'What does "subjective" mean?',  hint: '💡 "Whether pizza tastes good is subjective — it depends on who you ask!"',        answer: 'Based on personal opinions and feelings',           others: ['Based only on facts', 'Completely fair to everyone', 'Agreed on by everyone'] },
+      { prompt: 'What does "perspective" mean?', hint: '💡 "From the wolf\'s perspective, the story of the three pigs might sound very different!"', answer: 'A particular point of view or way of seeing things', others: ['A type of drawing technique', 'A mathematical formula', 'A kind of tool'] },
+      { prompt: 'What does "stereotype" mean?',  hint: '💡 "Assuming all cats are unfriendly is a stereotype — it\'s not true of every cat!"', answer: 'An oversimplified, fixed idea about a group',     others: ['A scientific fact about a group', 'A personal experience', 'A kind of artwork'] },
+      { prompt: 'What does "theme" mean\n(in a story)?', hint: '💡 "The theme of Charlotte\'s Web is the power of friendship and sacrifice."', answer: 'The central message or lesson of a story',        others: ['The setting of the story', 'The main character\'s name', 'The length of the story'] },
+    ],
+    // Advanced spelling patterns (Idaho L.5.2.e)
+    'spelling': [
+      { prompt: 'Which word is spelled correctly?', answer: 'accommodation',  hint: '💡 ac-com-mo-da-tion: double C, double M',                      others: ['acommodation', 'accomodation', 'accomadation'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'occurrence',     hint: '💡 oc-cur-rence: double C, double R',                           others: ['occurence', 'ocurrence', 'occurrance'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'rhythm',         hint: '💡 rh-y-thm: no vowels except Y — very unusual!',               others: ['rythm', 'rhythem', 'rhthym'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'committee',      hint: '💡 com-mit-tee: double M, double T, double E',                  others: ['commitee', 'comittee', 'committe'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'argument',       hint: '💡 argue → argument: drop the E before -ment',                  others: ['arguement', 'arguemant', 'argumant'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'conscience',     hint: '💡 con-science: the word "science" is hiding inside!',           others: ['consciense', 'consience', 'concience'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'privilege',      hint: '💡 priv-i-lege: not "priviledge" — no D!',                      others: ['priviledge', 'privelege', 'privelidge'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'noticeable',     hint: '💡 notice + able: keep the E to protect the /s/ sound',         others: ['noticable', 'noticeable', 'noticible'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'supersede',      hint: '💡 super-sede: the only -sede word (not -cede or -ceed)',        others: ['supercede', 'superseed', 'superceed'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'questionnaire',  hint: '💡 question + -naire: double N in the middle',                  others: ['questionaire', 'questionnare', 'questionair'] },
+      { prompt: 'Which word means\n"to give something up"?', answer: 'forfeit', hint: '💡 for-feit: breaks the i-before-e rule (f-e-i-t)',          others: ['forfiet', 'forfeat', 'forfit'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'fluorescent',    hint: '💡 flu-o-res-cent: starts with flu- (like a river)',             others: ['flourescent', 'flurecent', 'floresent'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'perseverance',   hint: '💡 per-se-ver-ance: ends in -ance (not -ence)',                 others: ['perseverence', 'perseverance', 'persevereance'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'pneumonia',      hint: '💡 pneu-mo-ni-a: silent P at the start (Greek origin)',          others: ['neumonia', 'pnuemonia', 'pneumonea'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'mischievous',    hint: '💡 mis-chie-vous: 3 syllables (not "mis-chiev-i-ous")',         others: ['mischievious', 'mischeivous', 'mischevious'] },
+      { prompt: 'Which word means "more than enough"?', answer: 'sufficient', hint: '💡 suf-fi-cient: double F, ends in -icient',                    others: ['suficient', 'sufficent', 'suficent'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'exaggerate',     hint: '💡 ex-ag-ger-ate: double G in the middle',                      others: ['exagerate', 'exaggerrate', 'exaggarate'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'lightning',      hint: '💡 light-ning: no E after light (not "lightening")',            others: ['lightening', 'lightneing', 'ligtning'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'embarrass',      hint: '💡 em-bar-rass: double R, double S',                            others: ['embarras', 'embarass', 'embarrass'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'receive',        hint: '💡 i before E except after C: re-CE-ive',                      others: ['recieve', 'receve', 'receeve'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'acquaintance',   hint: '💡 ac-quaint-ance: silent C in acquaint-',                      others: ['aquaintance', 'acquantance', 'acquaintence'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'disappear',      hint: '💡 dis- + appear: one S, double P',                             others: ['dissapear', 'disapear', 'disappear'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'fascinate',      hint: '💡 fas-cin-ate: silent C (like "science")',                     others: ['fasinate', 'fascenate', 'facinate'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'maintenance',    hint: '💡 main-te-nance: main + ten + ance (not "maintanance")',        others: ['maintanance', 'maintainance', 'maintenence'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'parallel',       hint: '💡 par-al-lel: one R, double L in the middle, one L at end',    others: ['paralell', 'parallell', 'parrallel'] },
+    ],
+    // Complex grammar: perfect tenses, correlative conjunctions, voice (Idaho L.5.1)
+    'grammar': [
+      { prompt: '"She has finished her project."\nThis is in the ___ tense.',       hint: '💡 has/have + past participle = present perfect',                  answer: 'Present perfect',  others: ['Simple past', 'Future', 'Past continuous'] },
+      { prompt: '"By noon, he will have eaten."\nThis is in the ___ tense.',        hint: '💡 will have + past participle = future perfect',                  answer: 'Future perfect',   others: ['Simple future', 'Present perfect', 'Past perfect'] },
+      { prompt: 'Which sentence uses CORRELATIVE CONJUNCTIONS?',                    hint: '💡 Correlative conjunctions work in pairs: either/or, neither/nor, not only/but also', answer: 'Either you study or you fail.', others: ['You study and succeed.', 'You study, but you might still fail.', 'You study so that you succeed.'] },
+      { prompt: '"Not only ___ she smart, ___ also kind."',                         hint: '💡 "Not only … but also" is a correlative conjunction pair.',       answer: 'is / but',     others: ['was / and', 'is / and', 'is / or'] },
+      { prompt: '"Neither the dog ___ the cat ate its food."',                      hint: '💡 "Neither … nor" is a correlative conjunction pair.',            answer: 'nor',          others: ['or', 'and', 'but'] },
+      { prompt: 'Which sentence is in the ACTIVE VOICE?',                          hint: '💡 Active voice: subject DOES the action. Passive voice: subject RECEIVES the action.', answer: 'The dog chased the cat.',       others: ['The cat was chased by the dog.', 'The cat was being chased.', 'The dog was chasing.'] },
+      { prompt: 'Which sentence is in the PASSIVE VOICE?',                         hint: '💡 Passive = subject receives the action (is/was/were + past participle).', answer: 'The book was written by a child.',  others: ['A child wrote the book.', 'The child is writing.', 'A child had written quickly.'] },
+      { prompt: 'Which sentence is in the INDICATIVE mood?',                       hint: '💡 Indicative mood = stating facts or asking questions.',            answer: 'It is raining outside.',         others: ['Please stop raining!', 'If only it would rain!', 'Rain harder, sky!'] },
+      { prompt: 'Which sentence is in the IMPERATIVE mood?',                       hint: '💡 Imperative mood = giving a command or making a request.',        answer: 'Close the door quietly, please.', others: ['The door is closed.', 'The door will close soon.', 'If only the door were closed.'] },
+      { prompt: 'Which sentence uses the SUBJUNCTIVE mood?',                       hint: '💡 Subjunctive = hypothetical/wishes: "If I WERE you…" (not "was")', answer: 'If I were taller, I could reach the shelf.', others: ['If I was taller, I reached the shelf.', 'Because I am tall, I reached the shelf.', 'I am tall enough to reach.'] },
+      { prompt: '"They are swimming" is in the ___ tense.',                         hint: '💡 am/is/are + -ing = present progressive (happening right now)',    answer: 'Present progressive', others: ['Simple present', 'Present perfect', 'Past progressive'] },
+      { prompt: 'Which sentence correctly uses\na SEMICOLON?',                     hint: '💡 A semicolon joins two related independent clauses without a conjunction.', answer: 'It was late; she was tired.',    others: ['It was late, she was tired.', 'It was late and; she was tired.', 'It was late. and she was tired.'] },
+      { prompt: 'Which sentence correctly uses a COLON?',                          hint: '💡 A colon introduces a list or an explanation: "She needed three things: a pencil, paper, and an eraser."', answer: 'She packed three things: a towel, sunscreen, and water.', others: ['She packed: three things in total.', 'She packed three things, a towel sunscreen and water.', 'She packed three things; a towel, sunscreen, and water.'] },
+      { prompt: 'What is the GERUND in:\n"Swimming every day keeps me healthy."?', hint: '💡 A gerund = verb + -ing used as a NOUN (subject, object, or complement)', answer: 'Swimming',  others: ['every', 'healthy', 'keeps'] },
+      { prompt: 'What is an INFINITIVE?',                                           hint: '💡 An infinitive = "to" + base verb: to run, to read, to think, to eat', answer: '"To" + base verb form (e.g., to run, to read)', others: ['A verb ending in -ing', 'A verb in past tense', 'An action done in the future'] },
+      { prompt: 'Which sentence correctly\nuses a HYPHEN?',                         hint: '💡 Hyphens connect compound modifiers before a noun: "a well-known author."', answer: 'She is a well-known author.',   others: ['She is a well known author.', 'She is a well, known author.', 'She is an well-known author.'] },
+      { prompt: 'What is the PARTICIPLE in:\n"The running water filled the tub."?', hint: '💡 Participial adjective = verb form used to describe a noun',        answer: 'running',   others: ['water', 'filled', 'tub'] },
+      { prompt: 'Which is a COMPOUND-COMPLEX sentence?',                            hint: '💡 Compound-complex = 2 independent clauses + 1 dependent clause',     answer: 'She likes art, and he likes music, although both enjoy history.', others: ['She likes art and he likes music.', 'Although she likes art, she draws daily.', 'She likes art.'] },
+      { prompt: 'Which sentence uses CORRECT\nsubject-verb agreement with "neither"?', hint: '💡 "Neither" is singular: "Neither … is" not "Neither … are".',   answer: 'Neither of the answers is correct.',  others: ['Neither of the answers are correct.', 'Neither answer are correct.', 'Neither answers is correct.'] },
+      { prompt: 'What does an ADVERBIAL CLAUSE do?',                               hint: '💡 An adverbial clause modifies a verb, adjective, or another adverb. It starts with: because, when, although, while, if…', answer: 'Modifies a verb by telling when, why, or how',  others: ['Names a person or place', 'Describes a noun', 'Connects two nouns together'] },
+      { prompt: 'Which sentence correctly\nuses "whom"?',                           hint: '💡 Use "whom" when it is the object: "To whom did you speak?" (him, not he)', answer: 'To whom did you give the award?',  others: ['Who did you give the award to?', 'Whom gave you the award?', 'Whom is at the door?'] },
+      { prompt: 'What is the ANTECEDENT in:\n"Maria lost her backpack"?',           hint: '💡 Antecedent = the noun that a pronoun refers back to.',             answer: 'Maria',   others: ['lost', 'backpack', 'her'] },
+      { prompt: 'Which sentence contains\nan APPOSITIVE?',                          hint: '💡 Appositive = a noun phrase that renames another noun, set off by commas.', answer: 'My best friend, Jayden, loves to code.', others: ['My best friend loves to code.', 'My friend Jayden loves coding.', 'Jayden, my friend, coded together.'] },
+      { prompt: 'Which sentence correctly\nuses "fewer" vs. "less"?',               hint: '💡 "Fewer" = countable things (books, people). "Less" = uncountable things (water, time).', answer: 'I have fewer pencils than you.', others: ['I have less pencils than you.', 'I have fewer water than you.', 'I have less friends than you.'] },
+      { prompt: 'What is the OBJECT of the PREPOSITION\nin "The cat jumped over the fence"?', hint: '💡 Preposition + object: "over the fence" — the object is the noun after the preposition.', answer: 'fence', others: ['cat', 'jumped', 'over'] },
+    ],
+  },
+  grade6: {
+    // Figurative language, connotation, word relationships (Idaho L.6.4, L.6.5)
+    'vocabulary': [
+      { prompt: 'What is a SIMILE?',                          hint: '💡 Simile compares using "like" or "as": "She runs LIKE the wind." "He is AS tall AS a tree."', answer: 'A comparison using "like" or "as"',      others: ['A comparison without using "like" or "as"', 'An exaggeration for effect', 'Giving human traits to a non-human thing'] },
+      { prompt: 'What is a METAPHOR?',                        hint: '💡 Metaphor compares directly without "like/as": "Life IS a journey." "Time IS money."',         answer: 'A direct comparison without "like" or "as"', others: ['A comparison using "like" or "as"', 'An exaggeration', 'Repeating beginning sounds'] },
+      { prompt: 'What is PERSONIFICATION?',                   hint: '💡 Personification gives human traits to non-human things: "The wind WHISPERED through the trees."', answer: 'Giving human traits to non-human things', others: ['A comparison using "like" or "as"', 'An extreme exaggeration', 'A word that imitates a sound'] },
+      { prompt: 'What is HYPERBOLE?',                         hint: '💡 Hyperbole is extreme exaggeration: "I\'ve told you a MILLION times!" "I\'m so hungry I could eat a horse!"', answer: 'Extreme exaggeration for emphasis',      others: ['A mild understatement', 'A direct comparison', 'Giving objects human qualities'] },
+      { prompt: 'What is an IDIOM?',                          hint: '💡 Idiom = a phrase meaning something different from its literal words: "Break a leg!" really means "Good luck!"', answer: 'A phrase with a non-literal meaning',     others: ['A comparison using "like" or "as"', 'An extreme exaggeration', 'A word that sounds like what it means'] },
+      { prompt: '"Break a leg!" is an example of:',           hint: '💡 This idiom means "Good luck!" — the words don\'t mean what they literally say.',              answer: 'An idiom',                              others: ['A simile', 'Hyperbole', 'Personification'] },
+      { prompt: '"The stars danced in the night sky" is:', hint: '💡 Stars cannot really dance — this gives stars a human action. That\'s personification!',       answer: 'Personification',                       others: ['A simile', 'A metaphor', 'Hyperbole'] },
+      { prompt: '"She was as brave as a lion" is:',           hint: '💡 Uses "as…as" to compare — that\'s a simile!',                                               answer: 'A simile',                              others: ['A metaphor', 'Personification', 'An idiom'] },
+      { prompt: '"Life is a roller coaster" is:',             hint: '💡 Compares directly without "like" or "as" — that\'s a metaphor!',                            answer: 'A metaphor',                            others: ['A simile', 'Personification', 'Hyperbole'] },
+      { prompt: '"I have a million things to do!" is:',       hint: '💡 Nobody really has a million things — this is an extreme exaggeration (hyperbole).',         answer: 'Hyperbole',                             others: ['A simile', 'A metaphor', 'Personification'] },
+      { prompt: 'What is CONNOTATION?',                       hint: '💡 Connotation = the feelings/ideas associated with a word beyond its definition. "Home" feels warm; "house" feels neutral.', answer: 'The emotional feeling or association a word carries', others: ['The exact dictionary definition of a word', 'The number of syllables in a word', 'The origin language of a word'] },
+      { prompt: 'What is DENOTATION?',                        hint: '💡 Denotation = the literal, dictionary definition of a word.',                                answer: 'The literal dictionary definition of a word', others: ['The feeling a word gives you', 'A word\'s synonym', 'The word\'s root language'] },
+      { prompt: '"Slender" vs. "scrawny" — both mean thin.\nWhich has a NEGATIVE connotation?', hint: '💡 Connotation: slender sounds positive/elegant. Scrawny sounds unhealthy.',  answer: 'scrawny',  others: ['slender', 'Both are equally neutral', 'Neither — they are the same'] },
+      { prompt: 'What does the Latin root "CRED" mean?\n(as in credible, credit, incredible)', hint: '💡 credible = believable, incredible = not believable, credit = trust/belief', answer: 'To believe or trust', others: ['To create', 'To carry', 'To speak'] },
+      { prompt: 'What does the Greek root "CHRON" mean?\n(as in chronological, chronicle, synchronize)', hint: '💡 chronological = ordered by time, synchronize = make time the same', answer: 'Time',              others: ['Color', 'Number', 'Space'] },
+      { prompt: 'What does the Latin root "BENE" mean?\n(as in benefit, benevolent, benefactor)', hint: '💡 benefit = a good outcome, benevolent = wishing good to others',          answer: 'Good or well',     others: ['Bad or evil', 'Before', 'Life'] },
+      { prompt: 'What does the Greek root "MICRO" mean?\n(as in microscope, microphone, microchip)', hint: '💡 microscope = instrument to see tiny things, microphone = tiny sound tool', answer: 'Small or tiny',  others: ['Large or big', 'Far away', 'Fast or quick'] },
+      { prompt: 'What does the Latin root "MULTI" mean?\n(as in multiply, multiple, multimedia)', hint: '💡 multiply = make many, multiple = many',                                  answer: 'Many',             others: ['One', 'None', 'Half'] },
+      { prompt: 'ALLITERATION is:',                          hint: '💡 "Peter Piper picked a peck of pickled peppers" — repeating the same beginning consonant sound.',    answer: 'Repetition of the same beginning consonant sound', others: ['Words that rhyme at the end', 'An extreme exaggeration', 'A phrase with hidden meaning'] },
+      { prompt: 'ONOMATOPOEIA means:',                       hint: '💡 Words that sound like what they describe: buzz, crash, sizzle, hiss, pop, boom!',                      answer: 'Words that imitate the sound they describe', others: ['Words that mean the opposite', 'Words that rhyme', 'Giving objects human feelings'] },
+      { prompt: '"The sun smiled down on us" is:',           hint: '💡 The sun cannot really smile — this gives the sun a human action. Personification!',               answer: 'Personification',  others: ['A simile', 'Hyperbole', 'Alliteration'] },
+      { prompt: 'What is an ANALOGY?',                       hint: '💡 Analogy shows a similar relationship: "Puppy is to dog as kitten is to cat."',                    answer: 'A comparison that shows a relationship between two pairs', others: ['A word that means the opposite', 'A phrase with hidden meaning', 'A comparison using "like"'] },
+      { prompt: '"Hot is to cold as dark is to ___."',       hint: '💡 Hot and cold are OPPOSITES (antonyms). Dark and ___ should also be opposites.',                   answer: 'light',    others: ['night', 'dim', 'shade'] },
+      { prompt: '"Author is to book as painter is to ___."', hint: '💡 An author CREATES a book. A painter CREATES a ___.',                                              answer: 'painting', others: ['brush', 'canvas', 'gallery'] },
+      { prompt: '"Glance" and "stare" are SYNONYMS for looking.\nWhich has the connotation of looking BRIEFLY?', hint: '💡 Glance = a quick look. Stare = a long, fixed look.',  answer: 'glance',   others: ['stare', 'Both mean the same length', 'Neither — they are antonyms'] },
+    ],
+    // Complex spelling patterns (Idaho L.6.2.b)
+    'spelling': [
+      { prompt: 'Which word is spelled correctly?', answer: 'bureaucracy',    hint: '💡 bu-reau-cra-cy: "bureau" (French for desk) + -cracy',           others: ['burocracy', 'bureacracy', 'beaurocracy'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'surveillance',   hint: '💡 sur-veil-lance: like "veil" — watching from behind a veil',      others: ['surveilance', 'survelance', 'survaillance'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'entrepreneur',   hint: '💡 en-tre-pre-neur: French origin, ends in -eur',                    others: ['entrepeneur', 'entrepreunr', 'entrepraneur'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'conscientious',  hint: '💡 con-sci-en-tious: "science" is hiding inside again!',             others: ['conscientous', 'consciencious', 'conscienscious'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'Mediterranean',  hint: '💡 Med-i-ter-ra-ne-an: double R, ends in -ranean',                   others: ['Mediteranean', 'Meditirranean', 'Mediteranean'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'millennium',     hint: '💡 mil-len-ni-um: double L, double N',                               others: ['millenium', 'milenium', 'milleniom'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'camaraderie',    hint: '💡 cam-a-ra-de-rie: French origin, ends in -erie',                   others: ['camaradary', 'comraderie', 'camaraderie'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'miscellaneous',  hint: '💡 mis-cel-la-ne-ous: double L, ends in -aneous',                    others: ['miscelaneous', 'miscellaneous', 'miscelanious'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'ambiguous',      hint: '💡 am-big-u-ous: ends in -guous (not -gous)',                        others: ['ambigous', 'ambiguious', 'ambigious'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'catastrophe',    hint: '💡 ca-tas-tro-phe: ends in -phe (Greek origin, like "phone")',        others: ['catastrophy', 'catastropy', 'catistrophe'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'lieutenant',     hint: '💡 lieu-ten-ant: "lieu" means place in French (lieutenant = one who holds a place)', others: ['leutenant', 'leftenant', 'lieutanant'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'silhouette',     hint: '💡 sil-hou-ette: French origin, silent H, double T, ends in -ette',  others: ['silouette', 'siluette', 'silhouete'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'exhilarate',     hint: '💡 ex-hil-a-rate: silent H after x, note the A before -rate',        others: ['exhilerate', 'exhalarate', 'exhilarait'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'onomatopoeia',   hint: '💡 on-o-mat-o-poe-ia: 7 letters, ends in -oeia',                     others: ['onomatopeia', 'onomatapoeia', 'onomatopeja'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'camouflage',     hint: '💡 cam-ou-flage: French origin, -ou- in the middle, -flage at end',   others: ['camoflage', 'camouflauge', 'camouflarge'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'plagiarism',     hint: '💡 pla-gia-rism: -gia- in the middle (not -gea-)',                    others: ['plagerism', 'plagirism', 'plagerizm'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'discrepancy',    hint: '💡 dis-crep-an-cy: ends in -ancy (not -ency)',                        others: ['discrepency', 'discrepansy', 'discrepency'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'archaeological', hint: '💡 ar-chae-o-log-i-cal: ae together (like in "aeon")',                others: ['archeological', 'archaelogical', 'archealogical'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'gubernatorial',  hint: '💡 gu-ber-na-to-ri-al: from Latin "gubernator" (governor)',            others: ['gubernitorial', 'goveratorial', 'gubernatorial'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'omniscient',     hint: '💡 om-ni-sci-ent: omni = all, scient = knowing. Silent C!',           others: ['omnisient', 'omnicient', 'omnisicent'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'choreography',   hint: '💡 cho-re-og-ra-phy: chore + ography (like geography)',               others: ['coreography', 'choreograpy', 'chorography'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'prerequisite',   hint: '💡 pre-req-ui-site: pre + requisite, note the QUI in the middle',     others: ['prerequite', 'prerequisit', 'prereqisite'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'mediterranean',  hint: '💡 med-i-ter-ra-ne-an: double R in terr- (earth in Latin)',           others: ['mediteranean', 'mediteranian', 'meditarranean'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'benevolent',     hint: '💡 be-nev-o-lent: bene (good) + volent (wishing)',                    others: ['benevollent', 'benivolent', 'benevelent'] },
+      { prompt: 'Which word is spelled correctly?', answer: 'perspicacious',  hint: '💡 per-spi-ca-cious: means having keen insight. Ends in -cious.',     others: ['perspicacous', 'perspicatious', 'perspicacious'] },
+    ],
+    // Advanced grammar: pronoun case, punctuation, voice, agreement (Idaho L.6.1-2)
+    'grammar': [
+      { prompt: 'Which is a SUBJECTIVE pronoun?',                          hint: '💡 Subjective (subject) pronouns: I, he, she, we, they, who — they DO the action.', answer: 'She',  others: ['her', 'him', 'them'] },
+      { prompt: 'Which is an OBJECTIVE pronoun?',                          hint: '💡 Objective pronouns: me, him, her, us, them, whom — they RECEIVE the action.',   answer: 'them', others: ['they', 'we', 'she'] },
+      { prompt: 'Which is a POSSESSIVE pronoun?',                          hint: '💡 Possessive pronouns show ownership: mine, his, hers, ours, theirs, whose.',      answer: 'hers', others: ['her', 'she', 'her\'s'] },
+      { prompt: 'Which sentence uses the CORRECT\npronoun case?',          hint: '💡 Subject does the action → use "I/he/she/we/they". Object receives → use "me/him/her/us/them".', answer: 'She and I went to the game.',  others: ['Her and me went to the game.', 'Her and I went to the game.', 'She and me went to the game.'] },
+      { prompt: '"Give the trophy to ___ who deserves it."',               hint: '💡 "who" = subject. "whom" = object. "To ___" → the pronoun receives "to" → use "whom".', answer: 'whoever', others: ['whomever', 'who', 'whom'] },
+      { prompt: 'Which sentence correctly\nuses "who" vs. "whom"?',       hint: '💡 who = subject (who did it?), whom = object (to whom? for whom?)',              answer: 'To whom did she give the award?',  others: ['To who did she give the award?', 'Whom is at the door?', 'Who did she give it to whom?'] },
+      { prompt: 'Which sentence has CORRECT\npronoun-antecedent agreement?', hint: '💡 Pronoun must match its antecedent: singular noun → singular pronoun.',     answer: 'Each student must bring their own pencil.', others: ['Each student must bring our own pencil.', 'Each student must bring its own pencil.', 'Each students must bring their own pencil.'] },
+      { prompt: 'Which sentence avoids\na VAGUE PRONOUN?',                hint: '💡 Avoid vague pronouns: "She told Maria she was late" is unclear — who was late?', answer: 'Mr. Lee told the class that the field trip was postponed.', others: ['He told them it was postponed.', 'They said it got moved.', 'Someone said it was postponed.'] },
+      { prompt: 'Which sentence correctly\nuses a SEMICOLON?',             hint: '💡 Semicolon joins 2 related independent clauses: "Clause 1; Clause 2."',        answer: 'The sun set; the stars appeared.',          others: ['The sun; set and stars appeared.', 'The sun set, the stars appeared.', 'The sun set the stars; appeared.'] },
+      { prompt: 'Which sentence correctly\nuses a COLON?',                 hint: '💡 Colon introduces a list or explanation. The clause before the colon must be complete.',   answer: 'She excels in three subjects: math, science, and art.', others: ['She excels in: math, science, and art.', 'She excels: in math, science, and art.', 'She: excels in math, science, and art.'] },
+      { prompt: 'Which sentence correctly\nuses an EM DASH?',              hint: '💡 Em dash (—) adds emphasis or inserts a strong interruption: "She finally arrived—two hours late.", answer: 'She finally answered—after three days of silence.', others: ['She finally answered, after three days.', 'She finally answered - after three days of silence.', 'She finally, answered—after three days.'] },
+      { prompt: 'Which is in the ACTIVE VOICE?',                           hint: '💡 Active voice: SUBJECT → VERB → OBJECT. The subject does the action.',           answer: 'The committee approved the proposal.',       others: ['The proposal was approved by the committee.', 'The proposal had been approved.', 'Approval was given by the committee.'] },
+      { prompt: 'Which is in the PASSIVE VOICE?',                          hint: '💡 Passive voice: subject receives the action (is/was/were + past participle).',   answer: 'The ancient artifact was discovered by archaeologists.', others: ['Archaeologists discovered the ancient artifact.', 'The archaeologists made a great discovery.', 'The ancient artifact amazed archaeologists.'] },
+      { prompt: '"Whom" is used when the pronoun is:',                     hint: '💡 "Whom" replaces him/her/them (object). If you can say "him," use "whom."',     answer: 'The object of a verb or preposition',        others: ['The subject of a verb', 'A possessive pronoun', 'An indefinite reference'] },
+      { prompt: 'Which sentence has CORRECT\nsubject-verb agreement?',     hint: '💡 "None" can be singular or plural. "Neither" is usually singular.',            answer: 'Neither of the options is correct.',         others: ['Neither of the options are correct.', 'Neither option are correct.', 'Neither of the option is correct.'] },
+      { prompt: 'Which sentence uses CORRECT\nappositive punctuation?',    hint: '💡 A non-essential appositive (extra info) is set off by commas. An essential one is not.', answer: 'My sister, the one in college, is visiting.', others: ['My sister the one in college is visiting.', 'My sister — the one in college is visiting.', 'My sister; the one in college; is visiting.'] },
+      { prompt: 'Which sentence correctly\npunctuates a QUOTATION?',       hint: '💡 Commas and periods go INSIDE quotation marks in American English.',           answer: '"I\'ll be there," she promised.',             others: ['"I\'ll be there", she promised.', '"I\'ll be there" she promised.', '"I\'ll be there." she promised.'] },
+      { prompt: 'Which sentence shows\nVARIED SENTENCE STRUCTURE?',        hint: '💡 Good writing varies sentence length and structure — not all simple, not all long and complex.', answer: 'The storm hit suddenly. By morning, however, the sky had cleared and the sun shone brightly.', others: ['The storm hit. The sky cleared. The sun shone.', 'The storm hit suddenly and by morning the sky had cleared and the sun shone brightly and it was a beautiful day.', 'The storm hit suddenly.'] },
+      { prompt: 'What is the ERROR in:\n"Running down the street, the car hit him."?', hint: '💡 Dangling modifier: "Running down the street" should describe HIM, but the car cannot run.', answer: 'Dangling modifier — the car cannot be running down the street.', others: ['Incorrect verb tense', 'Wrong pronoun case', 'Sentence fragment'] },
+      { prompt: 'Which sentence correctly\nuses "affect" vs. "effect"?',   hint: '💡 affect (verb) = to influence. effect (noun) = the result.',                  answer: 'The rain affected our plans; its effects lasted all week.', others: ['The rain effected our plans; its affects lasted all week.', 'The rain affected our plans; its affects lasted all week.', 'The rain effected our plans; its effects lasted all week.'] },
+      { prompt: 'Which sentence correctly\nuses "lay" vs. "lie"?',         hint: '💡 "lay" needs an object (lay the book down). "lie" = recline (no object needed).', answer: 'She laid the book on the table.',           others: ['She lay the book on the table.', 'She lied the book on the table.', 'She lain the book on the table.'] },
+      { prompt: 'Which is a CORRECTLY\nformatted TITLE?',                  hint: '💡 Books, movies, albums = italics or underline. Articles, poems, short stories = quotation marks.', answer: '"The Road Not Taken" (poem title in quotes)', others: ['The Road Not Taken (poem with no formatting)', '"Charlotte\'s Web" (novel should be italicized)', '"The Dark Knight" (movie should be italicized)'] },
+      { prompt: 'Which sentence uses\ncorrect PARALLELISM?',               hint: '💡 Parallel structure: items in a list should have the same grammatical form.',  answer: 'She enjoys hiking, swimming, and biking.',   others: ['She enjoys hiking, to swim, and bikes.', 'She enjoys to hike, swimming, and biking.', 'She enjoys hiking, swim, and to bike.'] },
+      { prompt: '"Its" vs "It\'s" — which correctly\ncompletes: "___ time to leave"?', hint: '💡 "It\'s" = it is. "Its" = belonging to it.',                      answer: "It's",     others: ['Its', "Its'", 'It is\''] },
+      { prompt: 'A TRANSITIONAL word or phrase:',                          hint: '💡 Transitions connect ideas: however, therefore, furthermore, in contrast, as a result, for example…', answer: 'Connects ideas between sentences or paragraphs', others: ['Starts every new paragraph', 'Is always a conjunction', 'Replaces a pronoun'] },
+    ],
+  },
+});
 
 // ── Reading game state ────────────────────────
 const R = {
