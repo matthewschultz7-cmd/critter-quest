@@ -1349,7 +1349,7 @@ function submitPin() {
 let _editItemId = null;
 let _storeAdminBackTo = 'store';
 
-function renderStoreAdmin(data) {
+function renderStoreAdmin(data = {}) {
   if (data.backTo) _storeAdminBackTo = data.backTo;
   const items = getStore();
   const itemList = items.length === 0
@@ -1435,7 +1435,7 @@ function renderStoreAdmin(data) {
           </div>
           <p style="font-size:.8rem;color:#94a3b8;font-weight:700;margin-top:.4rem">Share this with any device to join your family's profiles.</p>
         </div>
-        <button class="primary-btn" style="width:100%" onclick="showFamilyPickerScreen()">🔄 Switch / Manage Families</button>
+        <button class="primary-btn" style="width:100%" onclick="showFamilyPickerScreen('store-admin')">🔄 Switch / Manage Families</button>
       </div>
     </div>`;
 }

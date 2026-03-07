@@ -129,7 +129,9 @@ function showJoinScreen(errorMsg) {
 }
 
 // ── Family picker (shown when device has 2+ saved families) ───
-function showFamilyPickerScreen() {
+let _pickerBackTo = null;
+function showFamilyPickerScreen(backTo) {
+  if (backTo !== undefined) _pickerBackTo = backTo;
   const families = getKnownFamilies().sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0));
   const el = document.getElementById('screen-join');
   el.classList.add('active');
@@ -159,6 +161,7 @@ function showFamilyPickerScreen() {
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
       <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="margin-top:0.5rem">+ Join another family</button>
+      ${_pickerBackTo ? `<button class="text-btn" onclick="nav('${_pickerBackTo}', {})" style="margin-top:0.25rem">← Back to Store</button>` : ''}
     </div>`;
 }
 
