@@ -158,7 +158,7 @@ function showFamilyPickerScreen() {
       <div class="logo-big">🐾 Critter Quest</div>
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
-      <button class="primary-btn big outline" onclick="showJoinScreen()" style="margin-top:0.5rem">+ Join another family</button>
+      <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="margin-top:0.5rem">+ Join another family</button>
     </div>`;
 }
 
@@ -220,6 +220,42 @@ function confirmDeleteFamily(familyId) {
   else showFamilyPickerScreen();
 }
 
+// ── Add family screen (stripped-down, for existing users) ─────
+function showAddFamilyScreen(errorMsg) {
+  const el = document.getElementById('screen-join');
+  el.classList.add('active');
+  document.querySelectorAll('.screen:not(#screen-join)').forEach(s => s.classList.remove('active'));
+  document.getElementById('app-header').style.display = 'none';
+
+  el.innerHTML = `
+    <div class="join-page">
+      <div class="join-mascot">🦁 🐸 🦋</div>
+      <div class="logo-big">🐾 Critter Quest</div>
+      <p class="join-tagline">Add a family to this device</p>
+      ${errorMsg ? `<div class="join-error">${errorMsg}</div>` : ''}
+      <div class="join-card">
+        <div class="join-card-title">👨‍👩‍👧 Enter your family code</div>
+        <input
+          type="text"
+          id="join-code-input"
+          class="join-input"
+          placeholder="e.g. TIGER-42"
+          maxlength="12"
+          autocomplete="off"
+          autocapitalize="characters"
+        />
+        <button class="primary-btn big" onclick="handleJoinCode()">Join Family →</button>
+        <button class="text-btn" onclick="showFamilyPickerScreen()" style="align-self:center">← Back</button>
+      </div>
+    </div>`;
+
+  const input = document.getElementById('join-code-input');
+  if (input) {
+    input.focus();
+    input.addEventListener('keydown', e => { if (e.key === 'Enter') handleJoinCode(); });
+  }
+}
+
 // ── Join code handler ─────────────────────────
 async function handleJoinCode() {
   const input = document.getElementById('join-code-input');
@@ -229,16 +265,17 @@ async function handleJoinCode() {
   const btn = document.querySelector('#screen-join .primary-btn.big');
   if (btn) { btn.textContent = 'Joining…'; btn.disabled = true; }
 
+  const hasExistingFamilies = getKnownFamilies().length > 0;
   try {
     const result = await joinFamilyByCode(code);
     if (result.ok) {
       nav('profiles');
     } else {
-      showJoinScreen(result.reason);
+      hasExistingFamilies ? showAddFamilyScreen(result.reason) : showJoinScreen(result.reason);
     }
   } catch (err) {
     console.error('Join error:', err);
-    showJoinScreen('Something went wrong. Please try again.');
+    hasExistingFamilies ? showAddFamilyScreen('Something went wrong. Please try again.') : showJoinScreen('Something went wrong. Please try again.');
   }
 }
 
