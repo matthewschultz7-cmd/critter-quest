@@ -228,6 +228,14 @@ body {
 .profile-card.add-profile:hover { border-color: var(--accent); color: var(--accent); }
 .profile-card.add-profile .pc-critter { font-size: 2rem; }
 
+.parent-store-btn {
+  font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 0.85rem;
+  color: #94A3B8; background: none; border: 2px solid #E2E8F0;
+  border-radius: 999px; padding: 8px 20px; cursor: pointer;
+  transition: all .18s; margin-top: -8px;
+}
+.parent-store-btn:hover { color: #475569; border-color: #94A3B8; background: #F8FAFC; }
+
 /* ─────────────────────────────────────────────
    PROFILE FORM SCREEN
 ───────────────────────────────────────────── */

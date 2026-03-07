@@ -167,6 +167,7 @@ function renderProfiles() {
           <div class="pc-name">Add Profile</div>
         </button>
       </div>
+      <button class="parent-store-btn" onclick="promptParentPin({screen:'store-admin',data:{backTo:'profiles'}})">⚙️ Parent Store</button>
     </div>`;
 }
 
@@ -1308,7 +1309,10 @@ async function confirmBuy(itemId) {
 }
 
 // ── Parent PIN prompt ─────────────────────────
-function promptParentPin() {
+let _pinTarget = { screen: 'store-admin', data: {} };
+
+function promptParentPin(target) {
+  _pinTarget = target || { screen: 'store-admin', data: {} };
   showModal(`
     <div class="modal-title">🔐 Parent Mode</div>
     <div class="modal-text">Enter the 4-digit PIN to edit the store.</div>
@@ -1334,7 +1338,7 @@ function pinCheck() { /* auto-submit handled by submitPin */ }
 function submitPin() {
   const pin = [0,1,2,3].map(i => (document.getElementById('pin'+i)||{}).value || '').join('');
   if (pin === getParentPin()) {
-    closeModal(); nav('store-admin', {});
+    closeModal(); nav(_pinTarget.screen, _pinTarget.data);
   } else {
     const err = document.getElementById('pin-error');
     if (err) { err.classList.add('show'); [0,1,2,3].forEach(i => { const d=document.getElementById('pin'+i); if(d) d.value=''; }); document.getElementById('pin0').focus(); }
@@ -1343,8 +1347,10 @@ function submitPin() {
 
 // ── Store admin screen ────────────────────────
 let _editItemId = null;
+let _storeAdminBackTo = 'store';
 
 function renderStoreAdmin(data) {
+  if (data.backTo) _storeAdminBackTo = data.backTo;
   const items = getStore();
   const itemList = items.length === 0
     ? '<div class="store-empty">No items yet. Add one below!</div>'
@@ -1363,9 +1369,12 @@ function renderStoreAdmin(data) {
 
   const editing = _editItemId ? getStore().find(s => s.id === _editItemId) : null;
 
+  const backTo = _storeAdminBackTo;
+  if (backTo === 'profiles') document.getElementById('app-header').style.display = 'none';
+
   document.getElementById('screen-store-admin').innerHTML = `
     <div class="page-wrap">
-      <button class="back-btn" onclick="nav('store')">← Store</button>
+      <button class="back-btn" onclick="nav('${backTo}')">← ${backTo === 'profiles' ? 'Profiles' : 'Store'}</button>
       <h2 class="page-title">⚙️ Parent: Edit Store</h2>
       <div class="admin-item-list">${itemList}</div>
       <div class="add-item-form">
@@ -1431,8 +1440,8 @@ function renderStoreAdmin(data) {
     </div>`;
 }
 
-function editStoreItem(id) { _editItemId = id; renderStoreAdmin({}); }
-function cancelEditItem()  { _editItemId = null; renderStoreAdmin({}); }
+function editStoreItem(id) { _editItemId = id; renderStoreAdmin({ backTo: _storeAdminBackTo }); }
+function cancelEditItem()  { _editItemId = null; renderStoreAdmin({ backTo: _storeAdminBackTo }); }
 
 async function saveStoreItem() {
   const id   = document.getElementById('ai-id').value;
@@ -1449,7 +1458,7 @@ async function saveStoreItem() {
   };
   if (id) { await updateStoreItem(id, item); _editItemId = null; }
   else     { await addStoreItem(item); }
-  renderStoreAdmin({});
+  renderStoreAdmin({ backTo: _storeAdminBackTo });
 }
 
 function deleteItem(id) {
@@ -1460,7 +1469,7 @@ function deleteItem(id) {
       <button class="primary-btn" onclick="closeModal()">Cancel</button>
     </div>`);
 }
-async function doDeleteItem(id) { await deleteStoreItem(id); closeModal(); renderStoreAdmin({}); }
+async function doDeleteItem(id) { await deleteStoreItem(id); closeModal(); renderStoreAdmin({ backTo: _storeAdminBackTo }); }
 
 async function changePin() {
   const p = (document.getElementById('new-pin').value || '').trim();
