@@ -1920,7 +1920,7 @@ async function submitFeedback() {
     return;
   }
   const p = getActiveProfile();
-  await saveFeedback(text, p?.name || 'Unknown');
+  try { await saveFeedback(text, p?.name || 'Unknown'); } catch (e) { console.warn('Feedback save failed:', e); }
   logCQ('feedback_submitted', { grade: p?.grade });
   showModal(`
     <div class="modal-title">🙏 Thank you!</div>
