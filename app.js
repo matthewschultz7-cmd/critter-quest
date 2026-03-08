@@ -1890,7 +1890,10 @@ function showThemeModal() {
     </button>`).join('');
   showModal(`<div class="modal-title">🎨 Change Theme</div>
     <div class="quick-theme-grid">${btns}</div>
-    <div class="modal-btns"><button class="text-btn" onclick="closeModal()">Close</button></div>`);
+    <div class="modal-btns">
+      <button class="primary-btn" onclick="closeModal(); nav('profiles')">👤 Switch Profile</button>
+      <button class="text-btn" onclick="closeModal()">Close</button>
+    </div>`);
 }
 
 async function quickSwitchTheme(themeKey) {
