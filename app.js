@@ -217,6 +217,7 @@ function renderHeader() {
 document.getElementById('hdr-name').addEventListener('click', showThemeModal);
 document.getElementById('hdr-dashboard').addEventListener('click', () => nav('dashboard'));
 document.getElementById('hdr-coins').addEventListener('click', () => nav('bank'));
+document.getElementById('hdr-feedback').addEventListener('click', showFeedbackModal);
 
 // ── Profiles screen ───────────────────────────
 function renderProfiles() {
@@ -1894,6 +1895,37 @@ function showThemeModal() {
       <button class="primary-btn" onclick="closeModal(); nav('profiles')">👤 Switch Profile</button>
       <button class="text-btn" onclick="closeModal()">Close</button>
     </div>`);
+}
+
+// ── Feedback modal ────────────────────────────
+function showFeedbackModal() {
+  showModal(`
+    <div class="modal-title">💬 Share Feedback</div>
+    <div class="modal-text" style="margin-bottom:10px">What do you think of Critter Quest? Any ideas or suggestions?</div>
+    <textarea id="feedback-text" placeholder="Type your feedback here…"
+      style="width:100%;min-height:100px;border-radius:12px;border:2px solid #E2E8F0;
+             padding:10px;font-family:'Nunito',sans-serif;font-size:0.95rem;
+             resize:vertical;box-sizing:border-box;"></textarea>
+    <div class="modal-btns" style="margin-top:12px">
+      <button class="primary-btn" onclick="submitFeedback()">Send ✉️</button>
+      <button class="text-btn" onclick="closeModal()">Cancel</button>
+    </div>`);
+  setTimeout(() => document.getElementById('feedback-text')?.focus(), 50);
+}
+
+async function submitFeedback() {
+  const text = document.getElementById('feedback-text')?.value?.trim();
+  if (!text) {
+    document.getElementById('feedback-text').style.borderColor = '#EF4444';
+    return;
+  }
+  const p = getActiveProfile();
+  await saveFeedback(text, p?.name || 'Unknown');
+  logCQ('feedback_submitted', { grade: p?.grade });
+  showModal(`
+    <div class="modal-title">🙏 Thank you!</div>
+    <div class="modal-text">Your feedback helps make Critter Quest better for everyone.</div>
+    <div class="modal-btns"><button class="primary-btn" onclick="closeModal()">Close</button></div>`);
 }
 
 async function quickSwitchTheme(themeKey) {

@@ -346,6 +346,18 @@ async function setParentPin(pin) {
   await _saveFamily({ parentPin: pin });
 }
 
+// ── Feedback ───────────────────────────────────
+async function saveFeedback(text, profileName) {
+  if (!_firestore) return;
+  await _firestore.collection('feedback').add({
+    text,
+    profileName,
+    familyId:  _db.familyId  || null,
+    joinCode:  _db.joinCode  || null,
+    createdAt: new Date().toISOString(),
+  });
+}
+
 // ── Journey / session log ──────────────────────
 function getJourney(profileId, theme) {
   const p = getProfile(profileId);

@@ -95,6 +95,15 @@ body {
 .hdr-coins-btn:hover  { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(217,119,6,.2); }
 .hdr-coins-btn:active { transform: translateY(0); }
 
+.hdr-feedback-btn {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: none; background: #F1F5F9; font-size: 1rem;
+  cursor: pointer; transition: all .18s; display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hdr-feedback-btn:hover  { background: #E2E8F0; transform: scale(1.1); }
+.hdr-feedback-btn:active { transform: scale(0.95); }
+
 .flair-slots { display: flex; gap: 5px; }
 .flair-slot {
   width: 40px; height: 40px;               /* 40px meets touch target guidance */
