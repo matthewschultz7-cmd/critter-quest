@@ -23,9 +23,17 @@ const firebaseConfig = {
 
 // ── Bootstrap ─────────────────────────────────
 firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db   = firebase.firestore();
+const auth      = firebase.auth();
+const db        = firebase.firestore();
+const analytics = firebase.analytics();
 initFirestore(db);  // hand instance to data.js
+
+// ── Analytics helper ──────────────────────────
+// logCQ(eventName, params) — thin wrapper so the
+// rest of the app never imports firebase directly.
+function logCQ(eventName, params = {}) {
+  try { analytics.logEvent(eventName, params); } catch (e) { /* silently ignore */ }
+}
 
 // ── App entry point ───────────────────────────
 async function bootApp() {

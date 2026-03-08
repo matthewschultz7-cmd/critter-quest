@@ -320,6 +320,7 @@ async function saveProfile(editId) {
   } else {
     const p = await createProfile(name, _pfGrade, _pfTheme);
     setActiveProfile(p.id);
+    logCQ('profile_created', { grade: _pfGrade, theme: _pfTheme });
   }
   const p = getActiveProfile();
   applyTheme(p.theme, 'addition');
@@ -448,6 +449,8 @@ function initQuestGame(data) {
   G.sessionQ = 0; G.sessionCorrect = 0; G.sessionCoins = 0;
   G.streak = 0; G.correct = 0; G.total = 0; G.answered = false;
   G.missedProblems = [];
+
+  logCQ('quest_started', { subject: 'math', operation: G.op, grade: p.grade, theme: p.theme });
 
   renderQuestGame();
   newProblem();
@@ -1079,6 +1082,8 @@ async function finishSession() {
   const card = drawCard(p.theme);
   await addCard(p.id, card);
   await updateStats(p.id, G.sessionCorrect, G.sessionQ, G.streak);
+  logCQ('quest_completed', { subject: 'math', operation: G.op, grade: p.grade,
+    correct: G.sessionCorrect, total: G.sessionQ, coins: G.sessionCoins, card_rarity: card.rarity });
   await recordQuestSession(p.id, {
     theme:   p.theme,
     op:      G.op,
@@ -1419,6 +1424,9 @@ async function confirmBuy(itemId) {
   const p = getActiveProfile();
   if (!p) return;
   await purchaseItem(p.id, itemId);
+  const item = getStoreItems().find(i => i.id === itemId);
+  logCQ('store_purchase', { item_name: item?.name, item_type: item?.type,
+    cost: item?.cost, grade: p.grade });
   closeModal();
   renderStore();
   renderHeader();
@@ -2651,6 +2659,8 @@ function initReadGame(data) {
   R.streak = 0; R.answered = false; R.missedQuestions = [];
   R.qPool = buildReadPool(p.grade, R.cat);
 
+  logCQ('quest_started', { subject: 'reading', category: R.cat, grade: p.grade, theme: p.theme });
+
   renderReadGame();
   showReadQuestion();
 }
@@ -2815,6 +2825,8 @@ async function finishReadSession() {
   const card = drawCard(p.theme);
   await addCard(p.id, card);
   await updateStats(p.id, R.sessionCorrect, R.sessionQ, R.streak);
+  logCQ('quest_completed', { subject: 'reading', category: R.cat, grade: p.grade,
+    correct: R.sessionCorrect, total: R.sessionQ, coins: R.sessionCoins, card_rarity: card.rarity });
   nav('quest-done', {
     subject:        'reading',
     correct:        R.sessionCorrect,
