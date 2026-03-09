@@ -84,6 +84,7 @@ body {
 }
 .hdr-nav-btn:hover  { border-color: var(--accent); color: var(--accent); }
 .hdr-nav-btn:active { background: var(--accent-light); }
+.hdr-nav-btn:disabled { opacity: 0.45; cursor: default; border-color: #E2E8F0; color: #94A3B8; }
 
 .hdr-coins-btn {
   font-family: 'Nunito', sans-serif; font-weight: 900;

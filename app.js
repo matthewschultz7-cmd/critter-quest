@@ -174,6 +174,9 @@ function nav(screenId, data = {}) {
   document.getElementById('app-header').style.display = showHeader ? 'flex' : 'none';
   if (showHeader) renderHeader();
 
+  const homeBtn = document.getElementById('hdr-dashboard');
+  if (homeBtn) homeBtn.disabled = (screenId === 'dashboard');
+
   // Apply theme from active profile
   const p = getActiveProfile();
   if (p) applyTheme(p.theme, G.op);
