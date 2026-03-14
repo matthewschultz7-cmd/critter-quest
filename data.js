@@ -210,6 +210,8 @@ async function createProfile(name, grade, theme) {
     stats:          { totalCorrect: 0, totalAttempted: 0, sessionsCompleted: 0, bestStreak: 0 },
     sessions:       [],
     journeys:       {},
+    loginStreak:    0,
+    lastLoginDate:  null,
   };
   _db.profiles.push(profile);
   await _saveProfile(profile);
@@ -404,6 +406,65 @@ function getDailyOpCounts(profileId) {
     }
   }
   return counts;
+}
+
+// ── Daily login streak ────────────────────────
+async function checkDailyLogin(profileId) {
+  const p = _db.profiles.find(pr => pr.id === profileId);
+  if (!p) return null;
+
+  const todayStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  const lastDate = p.lastLoginDate || null;
+
+  // Same day — no change
+  if (lastDate === todayStr) {
+    return { isNewDay: false, wasGrace: false, newStreak: p.loginStreak || 0 };
+  }
+
+  // Calculate calendar days since last login
+  let daysSince = Infinity;
+  if (lastDate) {
+    daysSince = Math.round((new Date(todayStr) - new Date(lastDate)) / (1000 * 60 * 60 * 24));
+  }
+
+  let newStreak;
+  let wasGrace = false;
+  if (!lastDate || daysSince >= 3) {
+    newStreak = 1;
+  } else if (daysSince === 1) {
+    newStreak = (p.loginStreak || 0) + 1;
+  } else {
+    // daysSince === 2: grace day
+    newStreak = (p.loginStreak || 0) + 1;
+    wasGrace = true;
+  }
+
+  // Check milestones — draw card before saving so it gets included
+  let milestoneCard = null;
+  if (newStreak === 7) {
+    milestoneCard = drawCard(p.theme);
+  } else if (newStreak === 14) {
+    const pool = CARD_CATALOG[p.theme].filter(c => ['rare','epic','legendary'].includes(c.rarity));
+    const tmpl = pool[Math.floor(Math.random() * pool.length)];
+    milestoneCard = { id: 'card_' + Date.now() + '_' + Math.floor(Math.random() * 9999), name: tmpl.name, emoji: tmpl.emoji, rarity: tmpl.rarity, theme: p.theme, earnedDate: new Date().toLocaleDateString() };
+  } else if (newStreak === 30) {
+    const pool = CARD_CATALOG[p.theme].filter(c => ['epic','legendary'].includes(c.rarity));
+    const tmpl = pool[Math.floor(Math.random() * pool.length)];
+    milestoneCard = { id: 'card_' + Date.now() + '_' + Math.floor(Math.random() * 9999), name: tmpl.name, emoji: tmpl.emoji, rarity: tmpl.rarity, theme: p.theme, earnedDate: new Date().toLocaleDateString() };
+  }
+
+  // Update streak fields on the profile object before saving
+  p.loginStreak   = newStreak;
+  p.lastLoginDate = todayStr;
+
+  // addCoins saves the full profile (including updated streak fields)
+  await addCoins(profileId, 2, '🔥 Daily login bonus');
+
+  if (milestoneCard) {
+    await addCard(profileId, milestoneCard);
+  }
+
+  return { isNewDay: true, wasGrace, newStreak, milestoneCard };
 }
 
 // ── Card catalog & other constants (unchanged) ─

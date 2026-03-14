@@ -233,6 +233,12 @@ body {
 }
 .pc-grade { font-size: 0.68rem; font-weight: 700; color: #64748B; text-align: center; }
 .pc-theme { font-size: 0.68rem; font-weight: 700; color: #94A3B8; text-align: center; }
+.pc-streak {
+  font-size: 0.78rem; font-weight: 900; color: #EA580C;
+  background: #FFF7ED; border: 2px solid #FED7AA;
+  border-radius: 20px; padding: 3px 10px;
+  margin-top: 4px; text-align: center;
+}
 
 .profile-card.add-profile { border-style: dashed; border-color: #CBD5E1; color: #94A3B8; }
 .profile-card.add-profile:hover { border-color: var(--accent); color: var(--accent); }
