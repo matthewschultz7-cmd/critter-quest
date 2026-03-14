@@ -21,14 +21,15 @@ body {
   min-height: 100vh;
   transition: background .4s ease;
   overflow-x: hidden;
-  display: flex; flex-direction: column;
 }
 
 .app-footer {
-  margin-top: auto; padding: 12px;
-  text-align: center; font-size: 0.72rem; font-weight: 700; color: #94A3B8;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  padding: 8px; text-align: center;
+  font-size: 0.72rem; font-weight: 700; color: #94A3B8;
+  pointer-events: none;
 }
-.app-footer a { color: #94A3B8; text-decoration: none; }
+.app-footer a { color: #94A3B8; text-decoration: none; pointer-events: all; }
 .app-footer a:hover { color: var(--accent); }
 
 /* ── Screen system ── */
