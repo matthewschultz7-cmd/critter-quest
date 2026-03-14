@@ -237,6 +237,7 @@ function renderProfiles() {
             <div class="pc-name">${esc(p.name)}</div>
             <div class="pc-grade">${GRADE_LABELS[p.grade] || 'Student'}</div>
             <div class="pc-theme">${THEMES[p.theme].icon} ${THEMES[p.theme].name}</div>
+            ${(p.loginStreak || 0) >= 1 ? `<div class="pc-streak">🔥 ${p.loginStreak}-day streak</div>` : ''}
           </div>
         `).join('')}
         <button class="profile-card add-profile" onclick="nav('profile-form',{})">
@@ -248,11 +249,54 @@ function renderProfiles() {
     </div>`;
 }
 
-function selectProfile(id) {
+async function selectProfile(id) {
   setActiveProfile(id);
   const p = getProfile(id);
   G.op = 'addition';
   applyTheme(p.theme, 'addition');
+
+  const result = await checkDailyLogin(id);
+  if (result && result.isNewDay) {
+    showLoginStreakModal(result, p);
+  } else {
+    nav('dashboard');
+  }
+}
+
+function showLoginStreakModal(result, profile) {
+  const { newStreak, wasGrace, milestoneCard } = result;
+  const RARITY_BG = { common:'#64748B', uncommon:'#16A34A', rare:'#2563EB', epic:'#9333EA', legendary:'#D97706' };
+
+  let streakMsg = wasGrace
+    ? `<p style="color:#F97316;font-weight:700;font-size:0.9rem;margin:0">⚠️ You almost lost it — don't miss tomorrow!</p>`
+    : `<p style="color:#64748B;font-size:0.85rem;margin:0">Keep it up!</p>`;
+
+  let milestoneHtml = '';
+  if (milestoneCard) {
+    const col = RARITY_BG[milestoneCard.rarity] || '#64748B';
+    milestoneHtml = `
+      <div style="margin:12px 0;padding:12px;background:#F8FAFC;border-radius:12px;border:2px solid ${col}">
+        <div style="font-size:0.75rem;font-weight:700;color:${col};text-transform:uppercase;letter-spacing:.05em">Milestone Bonus!</div>
+        <div style="font-size:2rem;margin:4px 0">${milestoneCard.emoji}</div>
+        <div style="font-weight:800;color:#1E293B">${esc(milestoneCard.name)}</div>
+        <div style="font-size:0.7rem;font-weight:700;color:${col}">${milestoneCard.rarity.toUpperCase()}</div>
+      </div>`;
+  }
+
+  showModal(`
+    <div style="text-align:center;padding:8px 0">
+      <div style="font-size:3rem;line-height:1">🔥</div>
+      <div style="font-size:2rem;font-weight:900;color:#1E293B;margin:6px 0">${newStreak}-Day Streak!</div>
+      <div style="font-size:0.9rem;color:#64748B;margin-bottom:4px">+2 coins added to your bank</div>
+      ${streakMsg}
+      ${milestoneHtml}
+      <button class="btn-primary" style="margin-top:16px;width:100%" onclick="closeModal();nav('dashboard')">Let's Go! 🚀</button>
+    </div>
+  `);
+}
+
+function closeStreakModal() {
+  closeModal();
   nav('dashboard');
 }
 
