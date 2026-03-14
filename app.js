@@ -237,7 +237,7 @@ function renderProfiles() {
             <div class="pc-name">${esc(p.name)}</div>
             <div class="pc-grade">${GRADE_LABELS[p.grade] || 'Student'}</div>
             <div class="pc-theme">${THEMES[p.theme].icon} ${THEMES[p.theme].name}</div>
-            ${(p.loginStreak || 0) >= 1 ? `<div class="pc-streak">🔥 ${p.loginStreak}-day streak</div>` : ''}
+            ${(p.loginStreak || 0) >= 2 ? `<div class="pc-streak">🔥 ${p.loginStreak}-day streak</div>` : ''}
           </div>
         `).join('')}
         <button class="profile-card add-profile" onclick="nav('profile-form',{})">
