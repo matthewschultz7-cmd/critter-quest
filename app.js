@@ -387,60 +387,194 @@ async function doDeleteProfile(id) {
 }
 
 // ── Dashboard screen ──────────────────────────
+const THEME_WALL_DECOS = {
+  forest: ['🌲','🍃','🌿','🐿️','🍄','🌲','🍃','🌿'],
+  ocean:  ['🌊','🐚','⭐','🪸','🐠','🌊','🐚','⭐'],
+  farm:   ['🌾','🌻','🐣','🍀','🌼','🌾','🌻','🐣'],
+  jungle: ['🌴','🌿','🦋','🍃','🌺','🌴','🌿','🦋'],
+  arctic: ['❄️','⛄','✨','🌨️','💎','❄️','⛄','✨'],
+};
+
 function renderDashboard() {
   const p = getActiveProfile();
   if (!p) { nav('profiles'); return; }
   const storeCount = getStore().length;
+  const wallCards  = p.wallCards || [null, null, null, null];
+  const decos      = THEME_WALL_DECOS[p.theme] || [];
+
+  // Build wall card slots
+  const wallSlotsHtml = wallCards.map((cardId, i) => {
+    const card = cardId ? p.inventory.find(c => c.id === cardId) : null;
+    if (card) {
+      const col = RARITY_COLORS[card.rarity] || '#64748B';
+      return `<div class="wall-slot filled" style="border-color:${col}" onclick="openWallCardPicker(${i})">
+        <div class="ws-emoji">${card.emoji}</div>
+        <div class="ws-name">${esc(card.name)}</div>
+        <div class="ws-rarity" style="color:${col}">${card.rarity}</div>
+      </div>`;
+    }
+    return `<div class="wall-slot empty" onclick="openWallCardPicker(${i})">
+      <div class="ws-plus">＋</div>
+      <div class="ws-hint">Add a card</div>
+    </div>`;
+  }).join('');
+
+  // Build decorative background emojis
+  const decoHtml = decos.map((e, i) =>
+    `<span class="wall-deco-item" style="--di:${i}">${e}</span>`
+  ).join('');
 
   document.getElementById('screen-dashboard').innerHTML = `
-    <div class="page-wrap">
-      <div class="dash-welcome">
-        <button class="dash-mascot" onclick="showMascotModal()" title="Change your mascot">
-          ${p.themeCreatures[p.theme]}
-          <span class="dash-mascot-hint">✏️</span>
-        </button>
-        <div class="dash-welcome-text">
-          <h1>Hi, ${esc(p.name)}! 👋 <button class="name-edit-btn" onclick="showRenameModal()" title="Edit name">✏️</button></h1>
-          <p>${p.stats.sessionsCompleted} quests · ${p.stats.totalCorrect} correct · Best streak ${p.stats.bestStreak}</p>
+    <div class="dash-layout">
+
+      <!-- Left: card wall -->
+      <aside class="dash-wall" data-theme="${p.theme}">
+        <div class="wall-decos">${decoHtml}</div>
+        <div class="wall-inner">
+          <div class="wall-title">🎨 My Wall</div>
+          <div class="wall-slots">${wallSlotsHtml}</div>
+        </div>
+      </aside>
+
+      <!-- Center: main content -->
+      <div class="page-wrap">
+        <div class="dash-welcome">
+          <button class="dash-mascot" onclick="showMascotModal()" title="Change your mascot">
+            ${p.themeCreatures[p.theme]}
+            <span class="dash-mascot-hint">✏️</span>
+          </button>
+          <div class="dash-welcome-text">
+            <h1>Hi, ${esc(p.name)}! 👋 <button class="name-edit-btn" onclick="showRenameModal()" title="Edit name">✏️</button></h1>
+            <p>${p.stats.sessionsCompleted} quests · ${p.stats.totalCorrect} correct · Best streak ${p.stats.bestStreak}</p>
+          </div>
+        </div>
+        <div class="dash-grid">
+          <button class="dash-card accent wide" onclick="nav('quest-select')">
+            <div class="dc-icon">⚔️</div>
+            <div class="dc-label">Quests</div>
+            <div class="dc-sub">Start learning — 10 questions per quest!</div>
+          </button>
+          <button class="dash-card" onclick="nav('inventory')">
+            <div class="dc-icon">🎒</div>
+            <div class="dc-label">Inventory</div>
+            <div class="dc-sub">${p.inventory.length} card${p.inventory.length !== 1 ? 's' : ''}</div>
+          </button>
+          <button class="dash-card" onclick="nav('bank')">
+            <div class="dc-icon">🪙</div>
+            <div class="dc-label">Coins</div>
+            <div class="dc-sub">${p.coins} available</div>
+          </button>
+          <button class="dash-card" onclick="nav('store')">
+            <div class="dc-icon">🏪</div>
+            <div class="dc-label">Store</div>
+            <div class="dc-sub">${storeCount} reward${storeCount !== 1 ? 's' : ''}</div>
+          </button>
+          <button class="dash-card" onclick="nav('themes')">
+            <div class="dc-icon">${THEMES[p.theme].icon}</div>
+            <div class="dc-label">Themes</div>
+            <div class="dc-sub">${THEMES[p.theme].name} — ${p.themeCreatures[p.theme]}</div>
+          </button>
+          <button class="dash-card" onclick="nav('journey')">
+            ${(() => {
+              const j = (p.journeys && p.journeys[p.theme]) || { chapter: 1, stopsCompleted: 0 };
+              return `<div class="dc-icon">🗺️</div>
+              <div class="dc-label">Journey</div>
+              <div class="dc-sub">Chapter ${j.chapter} · Stop ${j.stopsCompleted}/10</div>`;
+            })()}
+          </button>
+        </div>
+        <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
+      </div>
+
+      <!-- Right: stats -->
+      <aside class="dash-stats">
+        <div class="stats-title">📊 My Stats</div>
+        <div class="stat-row"><span class="stat-icon">🔥</span><span class="stat-val">${p.loginStreak || 0}</span><span class="stat-lbl">day streak</span></div>
+        <div class="stat-row"><span class="stat-icon">⚔️</span><span class="stat-val">${p.stats.sessionsCompleted}</span><span class="stat-lbl">quests done</span></div>
+        <div class="stat-row"><span class="stat-icon">✅</span><span class="stat-val">${p.stats.totalCorrect}</span><span class="stat-lbl">correct</span></div>
+        <div class="stat-row"><span class="stat-icon">⭐</span><span class="stat-val">${p.stats.bestStreak}</span><span class="stat-lbl">best streak</span></div>
+        <div class="stat-row"><span class="stat-icon">🪙</span><span class="stat-val">${p.coins}</span><span class="stat-lbl">coins</span></div>
+      </aside>
+
+    </div>`;
+}
+
+// ── Wall card picker ───────────────────────────
+function openWallCardPicker(slotIndex) {
+  const p = getActiveProfile();
+  const wallCards = p.wallCards || [null, null, null, null];
+  const currentId = wallCards[slotIndex];
+  const current   = currentId ? p.inventory.find(c => c.id === currentId) : null;
+
+  // If slot is filled, show swap/remove options first
+  if (current) {
+    const col = RARITY_COLORS[current.rarity] || '#64748B';
+    showModal(`
+      <div style="text-align:center">
+        <div style="font-size:3rem">${current.emoji}</div>
+        <div style="font-weight:900;font-size:1.1rem;color:#1E293B;margin:4px 0">${esc(current.name)}</div>
+        <div style="font-size:0.75rem;font-weight:700;color:${col};text-transform:uppercase;margin-bottom:16px">${current.rarity}</div>
+        <div style="display:flex;gap:10px;justify-content:center">
+          <button class="btn-secondary" onclick="removeWallCard(${slotIndex})">Remove</button>
+          <button class="btn-primary" onclick="showWallCardPicker(${slotIndex})">Swap Card</button>
         </div>
       </div>
-      <div class="dash-grid">
-        <button class="dash-card accent wide" onclick="nav('quest-select')">
-          <div class="dc-icon">⚔️</div>
-          <div class="dc-label">Quests</div>
-          <div class="dc-sub">Start learning — 10 questions per quest!</div>
-        </button>
-        <button class="dash-card" onclick="nav('inventory')">
-          <div class="dc-icon">🎒</div>
-          <div class="dc-label">Inventory</div>
-          <div class="dc-sub">${p.inventory.length} card${p.inventory.length !== 1 ? 's' : ''}</div>
-        </button>
-        <button class="dash-card" onclick="nav('bank')">
-          <div class="dc-icon">🪙</div>
-          <div class="dc-label">Coins</div>
-          <div class="dc-sub">${p.coins} available</div>
-        </button>
-        <button class="dash-card" onclick="nav('store')">
-          <div class="dc-icon">🏪</div>
-          <div class="dc-label">Store</div>
-          <div class="dc-sub">${storeCount} reward${storeCount !== 1 ? 's' : ''}</div>
-        </button>
-        <button class="dash-card" onclick="nav('themes')">
-          <div class="dc-icon">${THEMES[p.theme].icon}</div>
-          <div class="dc-label">Themes</div>
-          <div class="dc-sub">${THEMES[p.theme].name} — ${p.themeCreatures[p.theme]}</div>
-        </button>
-        <button class="dash-card" onclick="nav('journey')">
-          ${(() => {
-            const j = (p.journeys && p.journeys[p.theme]) || { chapter: 1, stopsCompleted: 0 };
-            return `<div class="dc-icon">🗺️</div>
-            <div class="dc-label">Journey</div>
-            <div class="dc-sub">Chapter ${j.chapter} · Stop ${j.stopsCompleted}/10</div>`;
-          })()}
-        </button>
-      </div>
-      <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
-    </div>`;
+    `);
+    return;
+  }
+  showWallCardPicker(slotIndex);
+}
+
+function showWallCardPicker(slotIndex) {
+  const p = getActiveProfile();
+  const wallCards   = p.wallCards || [null, null, null, null];
+  const usedIds     = new Set(wallCards.filter(Boolean));
+  const available   = p.inventory.filter(c => !usedIds.has(c.id));
+
+  if (!available.length) {
+    showModal(`<div style="text-align:center;padding:8px">
+      <div style="font-size:2rem">🎒</div>
+      <div style="font-weight:800;margin:8px 0">No cards yet!</div>
+      <p style="color:#64748B;font-size:0.9rem">Complete quests to earn cards, then hang them here.</p>
+      <button class="btn-primary" style="margin-top:12px" onclick="closeModal()">Got it!</button>
+    </div>`);
+    return;
+  }
+
+  const grid = available.map(c => {
+    const col = RARITY_COLORS[c.rarity] || '#64748B';
+    return `<button class="wcp-card" style="border-color:${col}" onclick="pickWallCard(${slotIndex},'${c.id}')">
+      <div style="font-size:2rem">${c.emoji}</div>
+      <div style="font-size:0.7rem;font-weight:800;color:#1E293B;margin-top:4px">${esc(c.name)}</div>
+      <div style="font-size:0.6rem;font-weight:700;color:${col}">${c.rarity}</div>
+    </button>`;
+  }).join('');
+
+  showModal(`
+    <div>
+      <div style="font-weight:900;font-size:1rem;color:#1E293B;margin-bottom:12px">🎨 Pick a card for slot ${slotIndex + 1}</div>
+      <div class="wcp-grid">${grid}</div>
+      <button class="btn-secondary" style="margin-top:12px;width:100%" onclick="closeModal()">Cancel</button>
+    </div>
+  `);
+}
+
+async function pickWallCard(slotIndex, cardId) {
+  const p = getActiveProfile();
+  const wallCards = [...(p.wallCards || [null, null, null, null])];
+  wallCards[slotIndex] = cardId;
+  await setWallCards(p.id, wallCards);
+  closeModal();
+  renderDashboard();
+}
+
+async function removeWallCard(slotIndex) {
+  const p = getActiveProfile();
+  const wallCards = [...(p.wallCards || [null, null, null, null])];
+  wallCards[slotIndex] = null;
+  await setWallCards(p.id, wallCards);
+  closeModal();
+  renderDashboard();
 }
 
 // ── Quest select screen ───────────────────────
