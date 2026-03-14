@@ -211,10 +211,11 @@ body {
   padding: 40px 16px 48px; gap: 24px; min-height: 100vh;
 }
 .logo-img {
-  width: min(320px, 80vw);
+  width: min(420px, 90vw);
   height: auto;
   display: block;
   margin: 0 auto;
+  mix-blend-mode: multiply;
 }
 
 .logo-big {
