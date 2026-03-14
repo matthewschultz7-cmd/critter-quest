@@ -474,7 +474,7 @@ function renderDashboard() {
             <div class="dc-label">Themes</div>
             <div class="dc-sub">${THEMES[p.theme].name} — ${p.themeCreatures[p.theme]}</div>
           </button>
-          <button class="dash-card" onclick="nav('journey')">
+          <button class="dash-card wide" onclick="nav('journey')">
             ${(() => {
               const j = (p.journeys && p.journeys[p.theme]) || { chapter: 1, stopsCompleted: 0 };
               return `<div class="dc-icon">🗺️</div>
