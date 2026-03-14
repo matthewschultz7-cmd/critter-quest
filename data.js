@@ -212,6 +212,7 @@ async function createProfile(name, grade, theme) {
     journeys:       {},
     loginStreak:    0,
     lastLoginDate:  null,
+    wallCards:      [null, null, null, null],
   };
   _db.profiles.push(profile);
   await _saveProfile(profile);
@@ -278,6 +279,10 @@ async function addCard(profileId, card) {
 
 async function setFlair(profileId, flairArray) {
   await updateProfile(profileId, { flair: flairArray });
+}
+
+async function setWallCards(profileId, wallCards) {
+  await updateProfile(profileId, { wallCards });
 }
 
 async function updateStats(profileId, correct, attempted, streak) {

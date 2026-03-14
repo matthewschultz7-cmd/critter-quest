@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.westada.org)",
+      "WebSearch",
+      "WebFetch(domain:www.sde.idaho.gov)",
+      "Bash(git:*)"
+    ]
+  }
+}
