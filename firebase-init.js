@@ -74,8 +74,7 @@ function showLoadingScreen() {
   const el = document.getElementById('screen-join');
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <div class="join-loading">
         <div class="loading-spinner"></div>
         <p>Loading…</p>
@@ -94,8 +93,7 @@ function showJoinScreen(errorMsg) {
 
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">Math quests for curious kids!</p>
 
       ${errorMsg ? `<div class="join-error">${errorMsg}</div>` : ''}
@@ -164,8 +162,7 @@ function showFamilyPickerScreen(backTo) {
 
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
       <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="margin-top:0.5rem">+ Join another family</button>
@@ -177,8 +174,7 @@ async function enterFamily(familyId) {
   const el = document.getElementById('screen-join');
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <div class="join-loading"><div class="loading-spinner"></div><p>Loading…</p></div>
     </div>`;
   try {
@@ -240,8 +236,7 @@ function showAddFamilyScreen(errorMsg) {
 
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">Add a family to this device</p>
       ${errorMsg ? `<div class="join-error">${errorMsg}</div>` : ''}
       <div class="join-card">
@@ -296,8 +291,7 @@ function handleCreateFamily() {
   const el = document.getElementById('screen-join');
   el.innerHTML = `
     <div class="join-page">
-      <div class="join-mascot">🦁 🐸 🦋</div>
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">Math quests for curious kids!</p>
       <div class="join-card">
         <div class="join-card-title">✨ Create a new family?</div>

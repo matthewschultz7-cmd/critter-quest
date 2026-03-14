@@ -210,6 +210,13 @@ body {
   display: flex; flex-direction: column; align-items: center;
   padding: 40px 16px 48px; gap: 24px; min-height: 100vh;
 }
+.logo-img {
+  width: min(320px, 80vw);
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
+
 .logo-big {
   font-size: 2.2rem; font-weight: 900;
   background: linear-gradient(90deg, #FF6B6B, #A855F7);
