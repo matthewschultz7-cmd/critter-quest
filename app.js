@@ -227,7 +227,7 @@ function renderProfiles() {
   const profiles = getProfiles();
   document.getElementById('screen-profiles').innerHTML = `
     <div class="profiles-page">
-      <div class="logo-big">🐾 Critter Quest</div>
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="page-subtitle">Who's ready to learn today?</p>
       <div class="profile-grid">
         ${profiles.map(p => `
