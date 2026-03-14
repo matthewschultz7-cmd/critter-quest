@@ -1271,8 +1271,8 @@ body {
 
 @media (min-width: 900px) {
   .dash-layout {
-    grid-template-columns: 190px 1fr 160px;
-    align-items: start;
+    grid-template-columns: 220px 1fr 220px;
+    align-items: stretch;
   }
 }
 
@@ -1282,9 +1282,10 @@ body {
   position: relative;
   overflow: hidden;
   min-height: 100vh;
-  padding: 24px 12px;
+  padding: 32px 14px;
+  border-right: 1px solid rgba(0,0,0,.07);
 }
-@media (min-width: 900px) { .dash-wall { display: flex; flex-direction: column; } }
+@media (min-width: 900px) { .dash-wall { display: flex; flex-direction: column; justify-content: center; } }
 
 /* Theme background colours */
 .dash-wall[data-theme="forest"] { background: linear-gradient(180deg, #E8F5E9 0%, #F1F8E9 100%); }
@@ -1297,8 +1298,8 @@ body {
 .wall-decos { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .wall-deco-item {
   position: absolute;
-  font-size: 1.4rem;
-  opacity: 0.18;
+  font-size: 1.6rem;
+  opacity: 0.30;
   animation: wallFloat 6s ease-in-out infinite;
   animation-delay: calc(var(--di) * 0.9s);
 }
@@ -1317,48 +1318,50 @@ body {
 
 .wall-inner { position: relative; z-index: 1; }
 .wall-title {
-  font-size: 0.78rem; font-weight: 900; color: #64748B;
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 14px; text-align: center;
+  font-size: 0.82rem; font-weight: 900; color: #475569;
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 16px; text-align: center;
 }
 
 /* Wall card slots */
-.wall-slots { display: flex; flex-direction: column; gap: 10px; }
+.wall-slots { display: flex; flex-direction: column; gap: 12px; }
 .wall-slot {
-  background: white; border-radius: 14px; border: 2px dashed #CBD5E1;
-  padding: 10px 8px; text-align: center; cursor: pointer;
+  background: white; border-radius: 16px; border: 2px dashed #CBD5E1;
+  padding: 14px 10px; text-align: center; cursor: pointer;
   transition: transform .15s, box-shadow .15s;
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
 }
-.wall-slot:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.wall-slot:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,.12); }
 .wall-slot.filled { border-style: solid; border-width: 2px; }
-.ws-emoji  { font-size: 2rem; line-height: 1; }
-.ws-name   { font-size: 0.65rem; font-weight: 800; color: #1E293B; margin-top: 4px; line-height: 1.2; }
-.ws-rarity { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
-.ws-plus   { font-size: 1.4rem; color: #CBD5E1; line-height: 1; }
-.ws-hint   { font-size: 0.65rem; font-weight: 700; color: #CBD5E1; margin-top: 2px; }
+.ws-emoji  { font-size: 2.4rem; line-height: 1; }
+.ws-name   { font-size: 0.68rem; font-weight: 800; color: #1E293B; margin-top: 5px; line-height: 1.2; }
+.ws-rarity { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; margin-top: 2px; }
+.ws-plus   { font-size: 1.6rem; color: #CBD5E1; line-height: 1; }
+.ws-hint   { font-size: 0.68rem; font-weight: 700; color: #CBD5E1; margin-top: 3px; }
 
 /* ── Right: stats panel ── */
 .dash-stats {
   display: none;
-  padding: 24px 12px;
+  padding: 32px 14px;
   min-height: 100vh;
+  border-left: 1px solid rgba(0,0,0,.07);
 }
-@media (min-width: 900px) { .dash-stats { display: flex; flex-direction: column; gap: 4px; } }
+@media (min-width: 900px) { .dash-stats { display: flex; flex-direction: column; justify-content: center; gap: 0; } }
 
 .stats-title {
-  font-size: 0.78rem; font-weight: 900; color: #64748B;
-  text-transform: uppercase; letter-spacing: .06em;
-  margin-bottom: 14px;
+  font-size: 0.82rem; font-weight: 900; color: #475569;
+  text-transform: uppercase; letter-spacing: .08em;
+  margin-bottom: 16px;
 }
 .stat-row {
-  display: flex; align-items: center; gap: 8px;
-  background: white; border-radius: 12px;
-  padding: 10px 12px; margin-bottom: 6px;
-  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+  display: flex; align-items: center; gap: 10px;
+  background: white; border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.06);
 }
-.stat-icon { font-size: 1.1rem; }
-.stat-val  { font-size: 1.1rem; font-weight: 900; color: #1E293B; }
-.stat-lbl  { font-size: 0.68rem; font-weight: 700; color: #94A3B8; }
+.stat-icon { font-size: 1.3rem; flex-shrink: 0; }
+.stat-val  { font-size: 1.5rem; font-weight: 900; color: #1E293B; line-height: 1; }
+.stat-lbl  { font-size: 0.65rem; font-weight: 700; color: #94A3B8; line-height: 1.2; }
 
 /* Wall card picker modal grid */
 .wcp-grid {
