@@ -247,6 +247,10 @@ function renderProfiles() {
       </div>
       <button class="parent-store-btn" onclick="promptParentPin({screen:'store-admin',data:{backTo:'profiles'}})">⚙️ Parent Store</button>
     </div>`;
+  // Show What's New popup on first ever visit
+  if (!localStorage.getItem('cq_whats_new_seen_v1')) {
+    setTimeout(showWhatsNewModal, 300);
+  }
 }
 
 async function selectProfile(id) {
@@ -298,6 +302,44 @@ function showLoginStreakModal(result, profile) {
 function closeStreakModal() {
   closeModal();
   nav('dashboard');
+}
+
+// ── What's New modal (shown once on first visit) ──────────────────────────
+const WHATS_NEW_ITEMS = [
+  { icon: '🔥', title: 'Daily Login Streaks',  desc: 'Log in every day to earn 2 bonus coins. Hit 7, 14, or 30 days in a row for a rare card reward!' },
+  { icon: '🃏', title: 'Card Wall',             desc: 'Hang your favorite cards on your dashboard wall — pick up to 4 cards to show off!' },
+  { icon: '📊', title: 'Stats Panel',           desc: 'Your best streak, total correct answers, and sessions completed are now on your home screen.' },
+  { icon: '🎨', title: 'Fresh New Look',        desc: 'Critter Quest has a brand-new logo and polished design across every screen.' },
+  { icon: '📧', title: 'Contact Us',            desc: 'Questions or feedback? Reach us anytime at contact@critterquest.org.' },
+];
+
+function showWhatsNewModal() {
+  const itemsHtml = WHATS_NEW_ITEMS.map(it => `
+    <div class="wn-item">
+      <div class="wn-icon">${it.icon}</div>
+      <div class="wn-text">
+        <div class="wn-title">${esc(it.title)}</div>
+        <div class="wn-desc">${esc(it.desc)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  showModal(`
+    <div class="wn-modal">
+      <div class="wn-header">
+        <div class="wn-star">⭐</div>
+        <div class="wn-headline">What's New in Critter Quest!</div>
+        <div class="wn-sub">Here's what we've been building for you</div>
+      </div>
+      <div class="wn-list">${itemsHtml}</div>
+      <button class="btn-primary" style="width:100%;margin-top:8px" onclick="dismissWhatsNew()">Let's Play! 🚀</button>
+    </div>
+  `);
+}
+
+function dismissWhatsNew() {
+  localStorage.setItem('cq_whats_new_seen_v1', '1');
+  closeModal();
 }
 
 // ── Profile form screen ───────────────────────
