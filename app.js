@@ -195,6 +195,9 @@ function nav(screenId, data = {}) {
     case 'store-admin':  renderStoreAdmin(data); break;
     case 'themes':       renderThemes(); break;
     case 'journey':      renderJourney(); break;
+    case 'story-select': renderStorySelect(); break;
+    case 'story-game':   initStoryGame(data); break;
+    case 'story-done':   renderStoryDone(data); break;
   }
 }
 
@@ -523,6 +526,11 @@ function renderDashboard() {
               <div class="dc-label">Journey</div>
               <div class="dc-sub">Chapter ${j.chapter} · Stop ${j.stopsCompleted}/10</div>`;
             })()}
+          </button>
+          <button class="dash-card wide" onclick="nav('story-select')">
+            <div class="dc-icon">📖</div>
+            <div class="dc-label">Story Quests</div>
+            <div class="dc-sub">Math adventures with a twist!</div>
           </button>
         </div>
         <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
