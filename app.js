@@ -731,6 +731,7 @@ function renderQuestGame() {
           <span class="equals">=</span>
           <span class="question-mark">?</span>
         </div>
+        <div id="bead-bar-container"></div>
         <div id="step-scaffold"></div>
         <div class="feedback" id="feedback"></div>
         <button class="next-btn" id="next-btn" onclick="nextProblem()">Next →</button>
@@ -782,7 +783,83 @@ function newProblem() {
   document.getElementById('next-btn').onclick      = nextProblem;
 
   applyTheme(p.theme, G.op);
+
+  // Show bead bar for K-level addition & subtraction
+  const isKinder = p.grade === 'kindergarten';
+  const useBeads = isKinder && (opKey === 'addition' || opKey === 'subtraction' || opKey === 'mixed');
+  if (useBeads) {
+    initBeadBar({ total: 10, pushed: 0, locked: 0 });
+  } else {
+    hideBeadBar();
+  }
+
   renderSteps();
+}
+
+// ── Bead Bar component ─────────────────────────
+// State lives here for the lifetime of one problem
+const _BB = { total: 10, pushed: 0, locked: 0 };
+
+function renderBeadBar() {
+  const container = document.getElementById('bead-bar-container');
+  if (!container) return;
+
+  const { total, pushed, locked } = _BB;
+
+  // Build bead buttons + a divider between pushed and free groups
+  let beadsHtml = '';
+  for (let i = 1; i <= total; i++) {
+    const isPushed  = i <= pushed;
+    const isLocked  = i <= locked;
+    const colorCls  = i <= 5 ? 'bead-a' : 'bead-b';
+    const stateCls  = isPushed ? 'bead-pushed' : 'bead-free';
+    const lockedCls = isLocked ? 'bead-locked' : '';
+
+    // Insert divider between the last pushed and first free bead
+    if (i === pushed + 1 && pushed > 0 && pushed < total) {
+      beadsHtml += `<div class="bead-divider"></div>`;
+    }
+
+    beadsHtml += `<button
+      class="bead ${colorCls} ${stateCls} ${lockedCls}"
+      ${isLocked ? 'disabled' : `onclick="beadClick(${i})"`}
+      aria-label="Bead ${i}"
+    ></button>`;
+  }
+
+  // Count label: show pushed count; hint changes based on state
+  const countLabel = pushed === 0 ? '' : `${pushed}`;
+  const hint = locked > 0
+    ? `${locked} + <span style="color:var(--accent)">${pushed - locked}</span> = ${pushed}`
+    : '';
+
+  container.innerHTML = `
+    <div class="bead-bar-wrap">
+      <div class="bead-track">${beadsHtml}</div>
+      <div class="bead-count">${countLabel}</div>
+      ${hint ? `<div class="bead-count-hint">${hint}</div>` : ''}
+    </div>`;
+}
+
+function beadClick(index) {
+  const { locked } = _BB;
+  // Clicking a pushed bead pulls it (and beads to its right) back
+  // Clicking a free bead pushes it (and beads to its left) over
+  const newPushed = index <= _BB.pushed ? index - 1 : index;
+  _BB.pushed = Math.max(newPushed, locked); // can't pull past the locked beads
+  renderBeadBar();
+}
+
+function initBeadBar({ total = 10, pushed = 0, locked = 0 } = {}) {
+  _BB.total  = total;
+  _BB.pushed = pushed;
+  _BB.locked = locked;
+  renderBeadBar();
+}
+
+function hideBeadBar() {
+  const container = document.getElementById('bead-bar-container');
+  if (container) container.innerHTML = '';
 }
 
 // ── Step scaffold rendering ────────────────────
