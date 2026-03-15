@@ -165,7 +165,7 @@ function showFamilyPickerScreen(backTo) {
       <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
-      <div style="display:flex;gap:10px;margin-top:0.5rem;max-width:340px;align-self:center">
+      <div style="display:flex;gap:10px;margin-top:0.5rem;width:100%;max-width:380px;align-self:center">
         <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="flex:1">+ Join</button>
         <button class="primary-btn big outline" onclick="handleCreateFamily()" style="flex:1">+ Create New</button>
       </div>
