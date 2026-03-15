@@ -166,7 +166,7 @@ function showFamilyPickerScreen(backTo) {
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
       <button class="primary-btn big" onclick="showAddFamilyScreen()" style="margin-top:0.5rem">+ Join an existing family</button>
-      <button class="primary-btn big outline" onclick="handleCreateFamily()">✨ Create a new family</button>
+      <button class="primary-btn big outline" onclick="handleCreateFamily()" style="margin-top:0.4rem">✨ Create a new family</button>
       ${_pickerBackTo ? `<button class="text-btn" onclick="nav('${_pickerBackTo}', {})" style="margin-top:0.25rem">← Back to Store</button>` : ''}
     </div>`;
 }
