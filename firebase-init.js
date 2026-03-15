@@ -165,7 +165,10 @@ function showFamilyPickerScreen(backTo) {
       <img src="logo.png" class="logo-img" alt="Critter Quest">
       <p class="join-tagline">${families.length === 1 ? 'Manage your family' : 'Which family are you?'}</p>
       <div class="family-list">${items}</div>
-      <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="margin-top:0.5rem">+ Join another family</button>
+      <div style="display:flex;gap:10px;margin-top:0.5rem;width:100%;max-width:340px">
+        <button class="primary-btn big outline" onclick="showAddFamilyScreen()" style="flex:1">+ Join</button>
+        <button class="primary-btn big outline" onclick="handleCreateFamily()" style="flex:1">+ Create New</button>
+      </div>
       ${_pickerBackTo ? `<button class="text-btn" onclick="nav('${_pickerBackTo}', {})" style="margin-top:0.25rem">← Back to Store</button>` : ''}
     </div>`;
 }
@@ -251,6 +254,8 @@ function showAddFamilyScreen(errorMsg) {
           autocapitalize="characters"
         />
         <button class="primary-btn big" onclick="handleJoinCode()">Join Family →</button>
+        <div class="join-divider">or</div>
+        <button class="primary-btn big outline" onclick="handleCreateFamily()">✨ Create a New Family</button>
         <button class="text-btn" onclick="showFamilyPickerScreen()" style="align-self:center">← Back</button>
       </div>
     </div>`;
