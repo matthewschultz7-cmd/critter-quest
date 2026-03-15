@@ -811,6 +811,10 @@ function renderBeadBar() {
 
   const { total, pushed, locked, target } = _BB;
 
+  // Pre-compute correct/pulse state for the whole render pass
+  const isCorrect  = target > 0 && pushed === target;
+  const notCorrect = target > 0 && !isCorrect;
+
   // Build bead buttons + a divider between pushed and free groups
   let beadsHtml = '';
   for (let i = 1; i <= total; i++) {
@@ -820,13 +824,20 @@ function renderBeadBar() {
     const stateCls  = isPushed ? 'bead-pushed' : 'bead-free';
     const lockedCls = isLocked ? 'bead-locked' : '';
 
+    // Pulse the next bead the kid should interact with
+    const isNextBead = notCorrect && (
+      (_BB.mode === 'add' && i === pushed + 1 && i > locked) ||
+      (_BB.mode === 'sub' && i === pushed && pushed > 0)
+    );
+    const nextCls = isNextBead ? 'bead-next' : '';
+
     // Divider between pushed and free groups
     if (i === pushed + 1 && pushed > 0 && pushed < total) {
       beadsHtml += `<div class="bead-divider"></div>`;
     }
 
     beadsHtml += `<button
-      class="bead ${colorCls} ${stateCls} ${lockedCls}"
+      class="bead ${colorCls} ${stateCls} ${lockedCls} ${nextCls}"
       ${isLocked ? 'disabled' : `onclick="beadClick(${i})"`}
       aria-label="Bead ${i}"
     ></button>`;
@@ -899,7 +910,7 @@ function renderBeadBar() {
   }
 
   container.innerHTML = `
-    <div class="bead-bar-wrap">
+    <div class="bead-bar-wrap${isCorrect ? ' bead-bar-wrap--correct' : ''}">
       <div class="bead-track">${beadsHtml}</div>
       ${statusHtml}
     </div>`;
