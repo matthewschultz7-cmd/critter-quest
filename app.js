@@ -1648,7 +1648,7 @@ async function confirmBuy(itemId) {
   const p = getActiveProfile();
   if (!p) return;
   await purchaseItem(p.id, itemId);
-  const item = getStoreItems().find(i => i.id === itemId);
+  const item = getStore().find(i => i.id === itemId);
   logCQ('store_purchase', { item_name: item?.name, item_type: item?.type,
     cost: item?.cost, grade: p.grade });
   closeModal();

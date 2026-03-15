@@ -337,7 +337,8 @@ function canPurchase(profileId, itemId) {
   if (item.cooldownDays && item.purchases && item.purchases.length) {
     const mine = item.purchases.filter(pur => pur.profileId === profileId);
     if (mine.length) {
-      const daysSince = (Date.now() - new Date(mine[0].date)) / 86400000;
+      const lastPurchase = mine[mine.length - 1]; // most recent purchase
+      const daysSince = (Date.now() - new Date(lastPurchase.date)) / 86400000;
       if (daysSince < item.cooldownDays) {
         const daysLeft = Math.ceil(item.cooldownDays - daysSince);
         return { ok: false, reason: `Available in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}` };
