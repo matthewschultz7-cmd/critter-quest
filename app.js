@@ -786,9 +786,12 @@ function newProblem() {
 
   // Show bead bar for K-level addition & subtraction
   const isKinder = p.grade === 'kindergarten';
-  const useBeads = isKinder && (opKey === 'addition' || opKey === 'subtraction' || opKey === 'mixed');
-  if (useBeads) {
-    initBeadBar({ total: 10, pushed: 0, locked: 0 });
+  if (isKinder && opKey === 'addition') {
+    // Lock 'a' beads in place; kid pushes 'b' more until total reaches answer
+    initBeadBar({ total: 10, pushed: a, locked: a, target: answer, mode: 'add' });
+  } else if (isKinder && opKey === 'subtraction') {
+    // Pre-push 'a' beads; kid pulls beads back until total reaches answer
+    initBeadBar({ total: 10, pushed: a, locked: 0, target: answer, mode: 'sub' });
   } else {
     hideBeadBar();
   }
@@ -798,13 +801,15 @@ function newProblem() {
 
 // ── Bead Bar component ─────────────────────────
 // State lives here for the lifetime of one problem
-const _BB = { total: 10, pushed: 0, locked: 0 };
+const _BB = { total: 10, pushed: 0, locked: 0, target: 0, initialPushed: 0, mode: 'free' };
+// mode: 'free' = explore only | 'add' = push to target | 'sub' = pull back to target
+let _beadConfirmTimer = null;
 
 function renderBeadBar() {
   const container = document.getElementById('bead-bar-container');
   if (!container) return;
 
-  const { total, pushed, locked } = _BB;
+  const { total, pushed, locked, target } = _BB;
 
   // Build bead buttons + a divider between pushed and free groups
   let beadsHtml = '';
@@ -815,7 +820,7 @@ function renderBeadBar() {
     const stateCls  = isPushed ? 'bead-pushed' : 'bead-free';
     const lockedCls = isLocked ? 'bead-locked' : '';
 
-    // Insert divider between the last pushed and first free bead
+    // Divider between pushed and free groups
     if (i === pushed + 1 && pushed > 0 && pushed < total) {
       beadsHtml += `<div class="bead-divider"></div>`;
     }
@@ -827,39 +832,120 @@ function renderBeadBar() {
     ></button>`;
   }
 
-  // Count label: show pushed count; hint changes based on state
-  const countLabel = pushed === 0 ? '' : `${pushed}`;
-  const hint = locked > 0
-    ? `${locked} + <span style="color:var(--accent)">${pushed - locked}</span> = ${pushed}`
-    : '';
+  // Status hint below the track
+  let statusHtml = '';
+  if (target > 0 && _BB.mode === 'add') {
+    // ── Addition mode: kid pushes beads toward target ──────────────────────
+    const added   = pushed - locked;          // how many the kid has pushed
+    const needed  = target - pushed;          // how many more are needed
+    const isRight = pushed === target;
+    const tooMany = pushed > target;
+
+    if (isRight) {
+      statusHtml = `<div class="bead-count bead-count-correct">✓ ${pushed}</div>
+        <div class="bead-count-hint" style="color:#16A34A">
+          ${locked} + ${added} = ${pushed} 🎉
+        </div>`;
+    } else if (tooMany) {
+      statusHtml = `<div class="bead-count" style="color:#F97316">${pushed}</div>
+        <div class="bead-count-hint" style="color:#F97316">
+          Too many! Push ${pushed - target} back ↩
+        </div>`;
+    } else if (pushed === locked) {
+      // Nothing moved yet
+      statusHtml = `<div class="bead-count"></div>
+        <div class="bead-count-hint">Push beads to count on! →</div>`;
+    } else {
+      statusHtml = `<div class="bead-count">${pushed}</div>
+        <div class="bead-count-hint">
+          ${locked} + <span style="color:var(--accent);font-weight:900">${added}</span> = ${pushed}
+          &nbsp;·&nbsp; ${needed} more to go!
+        </div>`;
+    }
+
+  } else if (target > 0 && _BB.mode === 'sub') {
+    // ── Subtraction mode: kid pulls beads back toward target ────────────────
+    const removed  = _BB.initialPushed - pushed;  // how many pulled back so far
+    const toRemove = pushed - target;              // how many more to pull back
+    const isRight  = pushed === target;
+    const tooFew   = pushed < target;              // pulled back too many
+
+    if (isRight) {
+      statusHtml = `<div class="bead-count bead-count-correct">✓ ${pushed}</div>
+        <div class="bead-count-hint" style="color:#16A34A">
+          ${_BB.initialPushed} − ${removed} = ${pushed} 🎉
+        </div>`;
+    } else if (tooFew) {
+      statusHtml = `<div class="bead-count" style="color:#F97316">${pushed}</div>
+        <div class="bead-count-hint" style="color:#F97316">
+          Too many back! Push ${target - pushed} over →
+        </div>`;
+    } else if (removed === 0) {
+      // Nothing moved yet
+      statusHtml = `<div class="bead-count"></div>
+        <div class="bead-count-hint">Click beads to pull them back! ←</div>`;
+    } else {
+      statusHtml = `<div class="bead-count">${pushed}</div>
+        <div class="bead-count-hint">
+          ${_BB.initialPushed} − <span style="color:var(--accent);font-weight:900">${removed}</span> = ${pushed}
+          &nbsp;·&nbsp; Pull ${toRemove} more back!
+        </div>`;
+    }
+
+  } else {
+    // Free-play mode (no target)
+    const label = pushed > 0 ? `${pushed}` : '';
+    statusHtml = `<div class="bead-count">${label}</div>`;
+  }
 
   container.innerHTML = `
     <div class="bead-bar-wrap">
       <div class="bead-track">${beadsHtml}</div>
-      <div class="bead-count">${countLabel}</div>
-      ${hint ? `<div class="bead-count-hint">${hint}</div>` : ''}
+      ${statusHtml}
     </div>`;
 }
 
 function beadClick(index) {
+  if (G.answered) return;                       // problem already solved
   const { locked } = _BB;
-  // Clicking a pushed bead pulls it (and beads to its right) back
-  // Clicking a free bead pushes it (and beads to its left) over
   const newPushed = index <= _BB.pushed ? index - 1 : index;
-  _BB.pushed = Math.max(newPushed, locked); // can't pull past the locked beads
+  _BB.pushed = Math.max(newPushed, locked);
+
+  // Cancel any pending auto-confirm
+  if (_beadConfirmTimer) { clearTimeout(_beadConfirmTimer); _beadConfirmTimer = null; }
+
   renderBeadBar();
+
+  // Auto-confirm after brief pause when count matches target
+  if (_BB.target > 0 && _BB.pushed === _BB.target) {
+    _beadConfirmTimer = setTimeout(() => {
+      _beadConfirmTimer = null;
+      confirmBeadAnswer(_BB.pushed);
+    }, 650);
+  }
 }
 
-function initBeadBar({ total = 10, pushed = 0, locked = 0 } = {}) {
-  _BB.total  = total;
-  _BB.pushed = pushed;
-  _BB.locked = locked;
+function confirmBeadAnswer(val) {
+  // Fill the hidden step input and fire the normal checkStep flow
+  const inp = document.getElementById('step-input');
+  if (inp) { inp.value = String(val); checkStep(); }
+}
+
+function initBeadBar({ total = 10, pushed = 0, locked = 0, target = 0, mode = 'free' } = {}) {
+  _BB.total         = total;
+  _BB.pushed        = pushed;
+  _BB.locked        = locked;
+  _BB.target        = target;
+  _BB.initialPushed = pushed;
+  _BB.mode          = mode;
+  if (_beadConfirmTimer) { clearTimeout(_beadConfirmTimer); _beadConfirmTimer = null; }
   renderBeadBar();
 }
 
 function hideBeadBar() {
   const container = document.getElementById('bead-bar-container');
   if (container) container.innerHTML = '';
+  _BB.target = 0;
 }
 
 // ── Step scaffold rendering ────────────────────
@@ -1026,13 +1112,18 @@ function renderSteps() {
     } else if (i === currentStep && !answered) {
       // Active
       const prompt = step.label.replace('___', '<span class="step-blank">___</span>');
+      const usingBeads = _BB.target > 0;
       return `<div class="step-row active">
         <div class="step-prompt">${prompt}</div>
-        <div class="step-input-row">
-          <input type="number" id="step-input" class="step-input"
-            placeholder="?" inputmode="numeric" autocomplete="off" />
-          <button class="step-check-btn" onclick="checkStep()">✓</button>
-        </div>
+        ${usingBeads
+          ? `<input type="number" id="step-input" tabindex="-1" aria-hidden="true"
+               style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" value="">`
+          : `<div class="step-input-row">
+               <input type="number" id="step-input" class="step-input"
+                 placeholder="?" inputmode="numeric" autocomplete="off" />
+               <button class="step-check-btn" onclick="checkStep()">✓</button>
+             </div>`
+        }
         <div class="step-feedback" id="step-feedback"></div>
       </div>`;
     } else {
@@ -1045,7 +1136,7 @@ function renderSteps() {
   }).join('');
 
   const inp = document.getElementById('step-input');
-  if (inp) {
+  if (inp && _BB.target === 0) {
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkStep(); });
   }
