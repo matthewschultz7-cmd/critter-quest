@@ -281,7 +281,8 @@ async function handleJoinCode() {
     }
   } catch (err) {
     console.error('Join error:', err);
-    hasExistingFamilies ? showAddFamilyScreen('Something went wrong. Please try again.') : showJoinScreen('Something went wrong. Please try again.');
+    const msg = 'Something went wrong. Please try again.';
+    hasExistingFamilies ? showAddFamilyScreen(msg) : showJoinScreen(msg);
   }
 }
 
@@ -303,15 +304,39 @@ function handleCreateFamily() {
 }
 
 async function confirmCreateFamily() {
-  const btn = document.querySelector('#screen-join .primary-btn.big');
-  if (btn) { btn.textContent = 'Creating…'; btn.disabled = true; }
+  const el = document.getElementById('screen-join');
+
+  // Show loading state
+  el.innerHTML = `
+    <div class="join-page">
+      <img src="logo.png" class="logo-img" alt="Critter Quest">
+      <p class="join-tagline">Math quests for curious kids!</p>
+      <div class="join-card">
+        <div class="join-card-title">✨ Setting up your family…</div>
+        <div style="display:flex;justify-content:center;padding:16px 0">
+          <div class="loading-spinner"></div>
+        </div>
+      </div>
+    </div>`;
 
   try {
     const { joinCode } = await createFamily();
     showCodeRevealScreen(joinCode);
   } catch (err) {
     console.error('Create error:', err);
-    showJoinScreen('Could not create family. Check your connection and try again.');
+    // Show error inline with a retry button — no need to navigate away
+    el.innerHTML = `
+      <div class="join-page">
+        <img src="logo.png" class="logo-img" alt="Critter Quest">
+        <p class="join-tagline">Math quests for curious kids!</p>
+        <div class="join-card">
+          <div class="join-card-title">😕 Something went wrong</div>
+          <p class="join-card-sub">We couldn't create your family account. This is usually a temporary connection hiccup.</p>
+          <div class="join-error">Error: ${err && err.message ? err.message : 'Could not reach server'}</div>
+          <button class="primary-btn big" onclick="confirmCreateFamily()">🔄 Try Again</button>
+          <button class="text-btn" onclick="showJoinScreen()" style="align-self:center;margin-top:0.25rem">← Back</button>
+        </div>
+      </div>`;
   }
 }
 
