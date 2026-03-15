@@ -812,8 +812,9 @@ function renderBeadBar() {
   const { total, pushed, locked, target } = _BB;
 
   // Pre-compute correct/pulse state for the whole render pass
-  const isCorrect  = target > 0 && pushed === target;
-  const notCorrect = target > 0 && !isCorrect;
+  // Use mode !== 'free' instead of target > 0 so answer=0 problems work too
+  const isCorrect  = _BB.mode !== 'free' && pushed === target;
+  const notCorrect = _BB.mode !== 'free' && !isCorrect;
 
   // Build bead buttons + a divider between pushed and free groups
   let beadsHtml = '';
@@ -845,7 +846,7 @@ function renderBeadBar() {
 
   // Status hint below the track
   let statusHtml = '';
-  if (target > 0 && _BB.mode === 'add') {
+  if (_BB.mode === 'add') {
     // ── Addition mode: kid pushes beads toward target ──────────────────────
     const added   = pushed - locked;          // how many the kid has pushed
     const needed  = target - pushed;          // how many more are needed
@@ -874,7 +875,7 @@ function renderBeadBar() {
         </div>`;
     }
 
-  } else if (target > 0 && _BB.mode === 'sub') {
+  } else if (_BB.mode === 'sub') {
     // ── Subtraction mode: kid pulls beads back toward target ────────────────
     const removed  = _BB.initialPushed - pushed;  // how many pulled back so far
     const toRemove = pushed - target;              // how many more to pull back
@@ -928,7 +929,7 @@ function beadClick(index) {
   renderBeadBar();
 
   // Auto-confirm after brief pause when count matches target
-  if (_BB.target > 0 && _BB.pushed === _BB.target) {
+  if (_BB.mode !== 'free' && _BB.pushed === _BB.target) {
     _beadConfirmTimer = setTimeout(() => {
       _beadConfirmTimer = null;
       confirmBeadAnswer(_BB.pushed);
@@ -957,6 +958,7 @@ function hideBeadBar() {
   const container = document.getElementById('bead-bar-container');
   if (container) container.innerHTML = '';
   _BB.target = 0;
+  _BB.mode   = 'free';
 }
 
 // ── Step scaffold rendering ────────────────────
@@ -1123,7 +1125,7 @@ function renderSteps() {
     } else if (i === currentStep && !answered) {
       // Active
       const prompt = step.label.replace('___', '<span class="step-blank">___</span>');
-      const usingBeads = _BB.target > 0;
+      const usingBeads = _BB.mode !== 'free';
       return `<div class="step-row active">
         <div class="step-prompt">${prompt}</div>
         ${usingBeads
@@ -1147,7 +1149,7 @@ function renderSteps() {
   }).join('');
 
   const inp = document.getElementById('step-input');
-  if (inp && _BB.target === 0) {
+  if (inp && _BB.mode === 'free') {
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkStep(); });
   }
