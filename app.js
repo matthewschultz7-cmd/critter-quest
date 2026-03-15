@@ -732,6 +732,7 @@ function renderQuestGame() {
           <span class="question-mark">?</span>
         </div>
         <div id="bead-bar-container"></div>
+        <div id="ten-frame-container"></div>
         <div id="step-scaffold"></div>
         <div class="feedback" id="feedback"></div>
         <button class="next-btn" id="next-btn" onclick="nextProblem()">Next →</button>
@@ -795,6 +796,8 @@ function newProblem() {
   } else {
     hideBeadBar();
   }
+
+  hideTenFrame(); // renderSteps() will init if the first step has a tenFrame config
 
   renderSteps();
 }
@@ -961,6 +964,114 @@ function hideBeadBar() {
   _BB.mode   = 'free';
 }
 
+// ── Ten Frame component (Grade 1 Make-a-Ten) ───
+// State lives here for the lifetime of one step
+const _TF = { total: 10, filled: 0, locked: 0, target: 0, mode: 'free' };
+// mode: 'free' = hidden/inactive | 'fill' = kid fills empty cells toward target
+let _TFConfirmTimer = null;
+
+function renderTenFrame() {
+  const container = document.getElementById('ten-frame-container');
+  if (!container) return;
+
+  const { total, filled, locked, target } = _TF;
+  const isCorrect  = _TF.mode !== 'free' && filled === target;
+  const notCorrect = _TF.mode !== 'free' && !isCorrect;
+
+  // Build 10 cell buttons (1-indexed, left-to-right, top-to-bottom)
+  let cellsHtml = '';
+  for (let i = 1; i <= total; i++) {
+    const isFilled = i <= filled;
+    const isLocked = i <= locked;
+    const isNext   = notCorrect && !isFilled && i === filled + 1; // very next cell to tap
+
+    let cls = 'tf-cell ';
+    if      (isLocked)            cls += 'tf-cell-locked';
+    else if (isFilled)            cls += 'tf-cell-filled';
+    else if (isNext)              cls += 'tf-cell-empty tf-cell-next';
+    else                          cls += 'tf-cell-empty';
+
+    const dot = (isLocked || isFilled) ? '●' : '';
+
+    cellsHtml += `<button
+      class="${cls}"
+      ${(isLocked || isFilled) ? 'disabled' : `onclick="tenFrameClick(${i})"`}
+      aria-label="Cell ${i}${isFilled ? ' filled' : ' empty'}"
+    >${dot}</button>`;
+  }
+
+  // Status hint below the grid
+  let hintHtml = '';
+  if (_TF.mode !== 'free') {
+    const added  = filled - locked;
+    const needed = target - filled;
+    if (isCorrect) {
+      hintHtml = `<div class="ten-frame-hint" style="color:#16A34A">
+        ${locked} + ${added} = 10 🎉
+      </div>`;
+    } else if (filled === locked) {
+      hintHtml = `<div class="ten-frame-hint">Tap the empty cells to fill to 10!</div>`;
+    } else {
+      hintHtml = `<div class="ten-frame-hint">
+        ${locked} + <span style="color:var(--accent);font-weight:900">${added}</span> = ${filled}
+        &nbsp;·&nbsp; ${needed} more to go!
+      </div>`;
+    }
+  }
+
+  container.innerHTML = `
+    <div class="ten-frame-wrap${isCorrect ? ' ten-frame-wrap--correct' : ''}">
+      <div class="ten-frame-grid">${cellsHtml}</div>
+      ${hintHtml}
+    </div>`;
+}
+
+function tenFrameClick(index) {
+  if (G.answered) return;
+  if (index <= _TF.locked) return;
+
+  if (index <= _TF.filled) {
+    // Click a filled non-locked cell → pull back to just before it
+    _TF.filled = Math.max(index - 1, _TF.locked);
+  } else {
+    // Click an empty cell → fill forward to it
+    _TF.filled = Math.min(index, _TF.total);
+  }
+
+  if (_TFConfirmTimer) { clearTimeout(_TFConfirmTimer); _TFConfirmTimer = null; }
+
+  renderTenFrame();
+
+  // Auto-confirm after brief pause when filled equals target
+  if (_TF.mode !== 'free' && _TF.filled === _TF.target) {
+    _TFConfirmTimer = setTimeout(() => {
+      _TFConfirmTimer = null;
+      confirmTenFrameAnswer(_TF.filled - _TF.locked); // answer = cells kid added (= partner)
+    }, 650);
+  }
+}
+
+function confirmTenFrameAnswer(val) {
+  const inp = document.getElementById('step-input');
+  if (inp) { inp.value = String(val); checkStep(); }
+}
+
+function initTenFrame({ filled = 0, locked = 0, target = 0, mode = 'free' } = {}) {
+  _TF.total  = 10;
+  _TF.filled = filled;
+  _TF.locked = locked;
+  _TF.target = target;
+  _TF.mode   = mode;
+  if (_TFConfirmTimer) { clearTimeout(_TFConfirmTimer); _TFConfirmTimer = null; }
+  renderTenFrame();
+}
+
+function hideTenFrame() {
+  const container = document.getElementById('ten-frame-container');
+  if (container) container.innerHTML = '';
+  _TF.mode = 'free';
+}
+
 // ── Step scaffold rendering ────────────────────
 function buildSteps(grade, opKey, a, b, answer) {
   if (grade === 'kindergarten') return buildKinderSteps(opKey, a, b, answer);
@@ -996,7 +1107,7 @@ function buildGrade1Steps(opKey, a, b, answer) {
       // Make a Ten strategy
       const leftover = small - partner;
       return [
-        { label: `Make a 10!\n${big} + ___ = 10`,                              answer: partner,  hint: `What number added to ${big} gives you 10?` },
+        { label: `Make a 10!\n${big} + ___ = 10`,                              answer: partner,  hint: `What number added to ${big} gives you 10?`, tenFrame: { filled: big, locked: big, target: 10, mode: 'fill' } },
         { label: `You used ${partner} of the ${small}.\n${small} − ${partner} = ___`, answer: leftover, hint: `${small} take away ${partner} equals?` },
         { label: `10 + ${leftover} = ___`,                                      answer,           isFinal: true, hint: `Start at 10 and count up ${leftover} more!` },
       ];
@@ -1123,12 +1234,19 @@ function renderSteps() {
         <span class="step-check-icon">✓</span>
       </div>`;
     } else if (i === currentStep && !answered) {
-      // Active
+      // Active — init/hide ten frame based on this step's config
+      if (step.tenFrame) {
+        if (_TF.mode === 'free') initTenFrame(step.tenFrame); // fresh start
+        else renderTenFrame();                                 // preserve filled state on re-render
+      } else {
+        hideTenFrame();
+      }
+
       const prompt = step.label.replace('___', '<span class="step-blank">___</span>');
-      const usingBeads = _BB.mode !== 'free';
+      const usingManipulative = _BB.mode !== 'free' || _TF.mode !== 'free';
       return `<div class="step-row active">
         <div class="step-prompt">${prompt}</div>
-        ${usingBeads
+        ${usingManipulative
           ? `<input type="number" id="step-input" tabindex="-1" aria-hidden="true"
                style="position:absolute;opacity:0;pointer-events:none;width:0;height:0" value="">`
           : `<div class="step-input-row">
@@ -1149,7 +1267,7 @@ function renderSteps() {
   }).join('');
 
   const inp = document.getElementById('step-input');
-  if (inp && _BB.mode === 'free') {
+  if (inp && _BB.mode === 'free' && _TF.mode === 'free') {
     inp.focus();
     inp.addEventListener('keydown', e => { if (e.key === 'Enter') checkStep(); });
   }
