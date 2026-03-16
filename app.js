@@ -198,6 +198,7 @@ function nav(screenId, data = {}) {
     case 'story-select': renderStorySelect(); break;
     case 'story-game':   initStoryGame(data); break;
     case 'story-done':   renderStoryDone(data); break;
+    case 'parent-hub':   renderParentHub(data); break;
   }
 }
 
@@ -248,7 +249,7 @@ function renderProfiles() {
           <div class="pc-name">Add Profile</div>
         </button>
       </div>
-      <button class="parent-store-btn" onclick="promptParentPin({screen:'store-admin',data:{backTo:'profiles'}})">⚙️ Parent Store</button>
+      <button class="parent-store-btn" onclick="promptParentPin({screen:'parent-hub',data:{}})">⚙️ Parent Hub</button>
     </div>`;
   // Show What's New popup on first ever visit
   if (!localStorage.getItem('cq_whats_new_seen_v1')) {
@@ -532,6 +533,11 @@ function renderDashboard() {
             <div class="dc-label">Story Quests</div>
             <div class="dc-sub">Math adventures with a twist!</div>
           </button>
+          <button class="dash-card" onclick="promptParentPin({screen:'parent-hub',data:{}})">
+            <div class="dc-icon">🔑</div>
+            <div class="dc-label">Parent Hub</div>
+            <div class="dc-sub">Controls &amp; Rewards</div>
+          </button>
         </div>
         <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
       </div>
@@ -661,6 +667,8 @@ function initQuestGame(data) {
   const p = getActiveProfile();
   if (!p) { nav('profiles'); return; }
   if (data.resumeOp) G.op = data.resumeOp;
+  // Parent operation lock overrides free choice (but not explicit resume)
+  if (!data.resumeOp && p.operationLock) G.op = p.operationLock;
 
   // Daily op limit per grade (fewer ops → more sessions per op)
   const _limit  = GRADE_CONFIGS[p.grade]?.sessionLimit ?? 2;
@@ -793,12 +801,13 @@ function newProblem() {
 
   applyTheme(p.theme, G.op);
 
-  // Show bead bar for K-level addition & subtraction
-  const isKinder = p.grade === 'kindergarten';
-  if (isKinder && opKey === 'addition') {
+  // Show bead bar for K-level addition & subtraction (unless parent disabled visual aids)
+  const isKinder   = p.grade === 'kindergarten';
+  const showAids   = (p.visualAids ?? true) !== false;
+  if (isKinder && showAids && opKey === 'addition') {
     // Lock 'a' beads in place; kid pushes 'b' more until total reaches answer
     initBeadBar({ total: 10, pushed: a, locked: a, target: answer, mode: 'add' });
-  } else if (isKinder && opKey === 'subtraction') {
+  } else if (isKinder && showAids && opKey === 'subtraction') {
     // Pre-push 'a' beads; kid pulls beads back until total reaches answer
     initBeadBar({ total: 10, pushed: a, locked: 0, target: answer, mode: 'sub' });
   } else {
@@ -1082,6 +1091,11 @@ function hideTenFrame() {
 
 // ── Step scaffold rendering ────────────────────
 function buildSteps(grade, opKey, a, b, answer) {
+  // Parent setting: mental math — single direct-answer step, no scaffolding
+  const p = getActiveProfile();
+  if (p?.learningMode === 'mental') {
+    return [{ label: `${a} ${OPS[opKey]?.symbol ?? '?'} ${b} = ___`, answer, isFinal: true }];
+  }
   if (grade === 'kindergarten') return buildKinderSteps(opKey, a, b, answer);
   if (grade === 'grade1')       return buildGrade1Steps(opKey, a, b, answer);
   if (grade === 'grade6')       return buildGrade6Steps(opKey, a, b, answer);
@@ -1242,8 +1256,9 @@ function renderSteps() {
         <span class="step-check-icon">✓</span>
       </div>`;
     } else if (i === currentStep && !answered) {
-      // Active — init/hide ten frame based on this step's config
-      if (step.tenFrame) {
+      // Active — init/hide ten frame based on this step's config (and parent visual aids setting)
+      const _showAids = (getActiveProfile()?.visualAids ?? true) !== false;
+      if (step.tenFrame && _showAids) {
         if (_TF.mode === 'free') initTenFrame(step.tenFrame); // fresh start
         else renderTenFrame();                                 // preserve filled state on re-render
       } else {
@@ -1352,7 +1367,7 @@ async function checkStep() {
     updateStreakUI();
     updateSessionBar();
     document.getElementById('next-btn').style.display = 'block';
-    if (G.sessionQ >= 10) {
+    if (G.sessionQ >= (getActiveProfile()?.sessionLength ?? 10)) {
       document.getElementById('next-btn').textContent = '🎉 See Results!';
       document.getElementById('next-btn').onclick = finishSession;
     }
@@ -1388,7 +1403,7 @@ async function checkStep() {
   updateSessionBar();
 
   document.getElementById('next-btn').style.display = 'block';
-  if (G.sessionQ >= 10) {
+  if (G.sessionQ >= (getActiveProfile()?.sessionLength ?? 10)) {
     document.getElementById('next-btn').textContent = '🎉 See Results!';
     document.getElementById('next-btn').onclick = finishSession;
   }
@@ -1680,9 +1695,10 @@ function updateSessionBar() {
   const fill  = document.getElementById('sess-fill');
   const label = document.getElementById('sess-label');
   const coins = document.getElementById('sess-coins');
-  const q = Math.min(G.sessionQ, 10);
-  if (fill)  fill.style.width = (q / 10 * 100) + '%';
-  if (label) label.textContent = `Question ${q} / 10`;
+  const limit = getActiveProfile()?.sessionLength ?? 10;
+  const q = Math.min(G.sessionQ, limit);
+  if (fill)  fill.style.width = (q / limit * 100) + '%';
+  if (label) label.textContent = `Question ${q} / ${limit}`;
   if (coins) coins.textContent = `🪙 ${G.sessionCoins}`;
 }
 
@@ -1929,7 +1945,6 @@ function renderStore() {
       <h2 class="page-title">🏪 Store</h2>
       ${p ? `<div class="page-subtitle">Your balance: 🪙 ${p.coins}</div>` : ''}
       <div class="store-grid">${itemsHtml}</div>
-      <button class="text-btn" onclick="promptParentPin()">⚙️ Parent: Edit Store</button>
     </div>`;
 }
 
@@ -2004,6 +2019,12 @@ function submitPin() {
 // ── Store admin screen ────────────────────────
 let _editItemId = null;
 let _storeAdminBackTo = 'store';
+let _storeRenderTarget = 'store-admin'; // 'store-admin' | 'parent-hub'
+
+function refreshStoreScreen() {
+  if (_storeRenderTarget === 'parent-hub') renderParentHub();
+  else renderStoreAdmin({ backTo: _storeAdminBackTo });
+}
 
 function renderStoreAdmin(data = {}) {
   if (data.backTo) _storeAdminBackTo = data.backTo;
@@ -2096,8 +2117,8 @@ function renderStoreAdmin(data = {}) {
     </div>`;
 }
 
-function editStoreItem(id) { _editItemId = id; renderStoreAdmin({ backTo: _storeAdminBackTo }); }
-function cancelEditItem()  { _editItemId = null; renderStoreAdmin({ backTo: _storeAdminBackTo }); }
+function editStoreItem(id) { _editItemId = id; refreshStoreScreen(); }
+function cancelEditItem()  { _editItemId = null; refreshStoreScreen(); }
 
 async function saveStoreItem() {
   const id   = document.getElementById('ai-id').value;
@@ -2114,7 +2135,7 @@ async function saveStoreItem() {
   };
   if (id) { await updateStoreItem(id, item); _editItemId = null; }
   else     { await addStoreItem(item); }
-  renderStoreAdmin({ backTo: _storeAdminBackTo });
+  refreshStoreScreen();
 }
 
 function deleteItem(id) {
@@ -2125,7 +2146,7 @@ function deleteItem(id) {
       <button class="primary-btn" onclick="closeModal()">Cancel</button>
     </div>`);
 }
-async function doDeleteItem(id) { await deleteStoreItem(id); closeModal(); renderStoreAdmin({ backTo: _storeAdminBackTo }); }
+async function doDeleteItem(id) { await deleteStoreItem(id); closeModal(); refreshStoreScreen(); }
 
 async function changePin() {
   const p = (document.getElementById('new-pin').value || '').trim();
@@ -2134,6 +2155,192 @@ async function changePin() {
   showModal(`<div class="modal-title">PIN Updated ✓</div>
     <div class="modal-text">New PIN: ${p}</div>
     <div class="modal-btns"><button class="primary-btn" onclick="closeModal()">Done</button></div>`);
+}
+
+// ── Parent Hub screen ─────────────────────────
+let _hubProfileId = null;
+
+function selectHubProfile(id) {
+  _hubProfileId = id;
+  renderParentHub();
+}
+
+async function saveHubSetting(field, value) {
+  if (!_hubProfileId) return;
+  await updateProfile(_hubProfileId, { [field]: value });
+  renderParentHub();
+}
+
+function renderParentHub() {
+  _storeRenderTarget = 'parent-hub';
+  const profiles = getProfiles();
+  if (!profiles.length) { nav('profiles'); return; }
+  if (!_hubProfileId || !profiles.find(p => p.id === _hubProfileId)) {
+    _hubProfileId = profiles[0].id;
+  }
+  const sp = profiles.find(p => p.id === _hubProfileId);
+
+  // Profile tabs
+  const tabsHtml = profiles.map(p => `
+    <button class="hub-profile-tab ${p.id === sp.id ? 'active' : ''}" onclick="selectHubProfile('${p.id}')">
+      ${esc(p.name)}
+    </button>`).join('');
+
+  // Operation lock options (grade-aware, no 'mixed')
+  const OP_LABELS = { addition: 'Addition (+)', subtraction: 'Subtraction (−)', multiplication: 'Multiplication (×)', division: 'Division (÷)' };
+  const availOps  = (GRADE_CONFIGS[sp.grade]?.availableOps ?? ['addition','subtraction']).filter(o => o !== 'mixed');
+  const lockOpts  = availOps.map(op => `
+    <option value="${op}" ${sp.operationLock === op ? 'selected' : ''}>${OP_LABELS[op] || op}</option>`).join('');
+
+  const lm = sp.learningMode   ?? 'guided';
+  const sl = sp.sessionLength  ?? 10;
+  const va = sp.visualAids     ?? true;
+  const ol = sp.operationLock  ?? null;
+
+  // Store items list
+  const items = getStore();
+  const editing = _editItemId ? items.find(s => s.id === _editItemId) : null;
+  const itemListHtml = items.length === 0
+    ? '<div class="store-empty">No rewards yet. Add one below!</div>'
+    : items.map(it => `
+        <div class="admin-item">
+          <div class="admin-item-emoji">${it.emoji || '🎁'}</div>
+          <div class="admin-item-info">
+            <div class="admin-item-name">${esc(it.name)}</div>
+            <div class="admin-item-meta">🪙 ${it.cost} · ${it.type || 'Reward'} · ${it.cooldownDays || 0}d cooldown</div>
+          </div>
+          <div class="admin-item-btns">
+            <button class="edit-btn" onclick="editStoreItem('${it.id}')">Edit</button>
+            <button class="del-btn"  onclick="deleteItem('${it.id}')">Delete</button>
+          </div>
+        </div>`).join('');
+
+  document.getElementById('screen-parent-hub').innerHTML = `
+    <div class="page-wrap">
+      <button class="back-btn" onclick="nav('dashboard')">← Dashboard</button>
+      <h2 class="page-title">🔑 Parent Hub</h2>
+
+      <div class="hub-profile-tabs">${tabsHtml}</div>
+
+      <!-- Learning Controls -->
+      <div class="hub-section">
+        <div class="hub-section-title">📚 Learning Controls — ${esc(sp.name)}</div>
+
+        <div class="hub-control-row">
+          <div class="hub-control-label">
+            <div class="hub-control-name">Problem solving</div>
+            <div class="hub-control-desc">How your child works through each problem</div>
+          </div>
+          <div class="hub-toggle-group">
+            <button class="hub-toggle-btn ${lm === 'guided' ? 'active' : ''}" onclick="saveHubSetting('learningMode','guided')">Guided Steps</button>
+            <button class="hub-toggle-btn ${lm === 'mental' ? 'active' : ''}" onclick="saveHubSetting('learningMode','mental')">Mental Math</button>
+          </div>
+        </div>
+
+        <div class="hub-control-row">
+          <div class="hub-control-label">
+            <div class="hub-control-name">Operation lock</div>
+            <div class="hub-control-desc">Restrict which operation is practiced</div>
+          </div>
+          <select class="hub-select" onchange="saveHubSetting('operationLock', this.value === '__free__' ? null : this.value)">
+            <option value="__free__" ${!ol ? 'selected' : ''}>Free Choice</option>
+            ${lockOpts}
+          </select>
+        </div>
+
+        <div class="hub-control-row">
+          <div class="hub-control-label">
+            <div class="hub-control-name">Session length</div>
+            <div class="hub-control-desc">Questions per quest session</div>
+          </div>
+          <div class="hub-toggle-group">
+            ${[5,10,15].map(n => `<button class="hub-toggle-btn ${sl === n ? 'active' : ''}" onclick="saveHubSetting('sessionLength',${n})">${n}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="hub-control-row">
+          <div class="hub-control-label">
+            <div class="hub-control-name">Visual aids</div>
+            <div class="hub-control-desc">Bead bar and ten frame manipulatives</div>
+          </div>
+          <div class="hub-toggle-group">
+            <button class="hub-toggle-btn ${va ? 'active' : ''}"  onclick="saveHubSetting('visualAids',true)">On</button>
+            <button class="hub-toggle-btn ${!va ? 'active' : ''}" onclick="saveHubSetting('visualAids',false)">Off</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store & Rewards -->
+      <div class="hub-section">
+        <div class="hub-section-title">🏪 Store &amp; Rewards</div>
+        <div class="admin-item-list">${itemListHtml}</div>
+        <div class="add-item-form">
+          <h3>${editing ? '✏️ Edit Item' : '➕ Add New Reward'}</h3>
+          <input type="hidden" id="ai-id" value="${editing ? editing.id : ''}" />
+          <div class="form-row">
+            <div class="form-group" style="flex:.3">
+              <label>Emoji</label>
+              <input type="text" id="ai-emoji" class="form-input" placeholder="🎁" maxlength="2" value="${editing ? editing.emoji||'' : ''}" />
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Reward Name</label>
+              <input type="text" id="ai-name" class="form-input" placeholder="Ice Cream Trip" value="${editing ? esc(editing.name) : ''}" />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="flex:1">
+              <label>Category</label>
+              <input type="text" id="ai-type" class="form-input" placeholder="Outing, Food, Toy…" value="${editing ? esc(editing.type||'') : ''}" />
+            </div>
+            <div class="form-group" style="flex:.6">
+              <label>Coin Cost 🪙</label>
+              <input type="number" id="ai-cost" class="form-input" placeholder="50" min="1" value="${editing ? editing.cost : ''}" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" id="ai-desc" class="form-input" placeholder="A trip to your favorite ice cream place!" value="${editing ? esc(editing.description||'') : ''}" />
+          </div>
+          <div class="form-group">
+            <label>Cooldown (days between purchases, 0 = no limit)</label>
+            <input type="number" id="ai-cd" class="form-input" placeholder="7" min="0" value="${editing ? editing.cooldownDays||0 : 0}" />
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="primary-btn" style="flex:1" onclick="saveStoreItem()">${editing ? 'Save Changes' : 'Add Reward'}</button>
+            ${editing ? `<button class="danger-btn" onclick="cancelEditItem()">Cancel</button>` : ''}
+          </div>
+        </div>
+      </div>
+
+      <!-- Change PIN -->
+      <div class="hub-section">
+        <div class="hub-section-title">🔑 Change Parent PIN</div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label>New PIN (4 digits)</label>
+            <input type="password" id="new-pin" class="form-input" placeholder="1234" maxlength="4" inputmode="numeric" />
+          </div>
+          <div style="flex:.4;display:flex;align-items:flex-end">
+            <button class="primary-btn" onclick="changePin()" style="width:100%">Save PIN</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Family Settings -->
+      <div class="hub-section">
+        <div class="hub-section-title">🏠 Family Settings</div>
+        <div class="form-group">
+          <label>Family Join Code</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="form-input" style="flex:1;font-size:1.2rem;font-weight:900;letter-spacing:.08em;text-align:center">${esc(getJoinCode() || '—')}</div>
+            <button class="primary-btn" onclick="copyCode('${esc(getJoinCode() || '')}')" style="white-space:nowrap">📋 Copy</button>
+          </div>
+          <p style="font-size:.8rem;color:#94a3b8;font-weight:700;margin-top:.4rem">Share this with any device to join your family's profiles.</p>
+        </div>
+        <button class="primary-btn" style="width:100%" onclick="showFamilyPickerScreen('parent-hub')">🔄 Switch / Manage Families</button>
+      </div>
+
+    </div>`;
 }
 
 // ── Themes screen ─────────────────────────────
