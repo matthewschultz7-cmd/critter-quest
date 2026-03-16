@@ -225,6 +225,7 @@ document.getElementById('hdr-name').addEventListener('click', showThemeModal);
 document.getElementById('hdr-dashboard').addEventListener('click', () => nav('dashboard'));
 document.getElementById('hdr-coins').addEventListener('click', () => nav('bank'));
 document.getElementById('hdr-feedback').addEventListener('click', showFeedbackModal);
+document.getElementById('hdr-parent').addEventListener('click', () => promptParentPin({screen:'parent-hub',data:{}}));
 
 // ── Profiles screen ───────────────────────────
 function renderProfiles() {
