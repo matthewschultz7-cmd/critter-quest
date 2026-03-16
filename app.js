@@ -252,7 +252,7 @@ function renderProfiles() {
       <button class="parent-store-btn" onclick="promptParentPin({screen:'parent-hub',data:{}})">⚙️ Parent Hub</button>
     </div>`;
   // Show What's New popup on first ever visit
-  if (!localStorage.getItem('cq_whats_new_seen_v1')) {
+  if (!localStorage.getItem('cq_whats_new_seen_v2')) {
     setTimeout(showWhatsNewModal, 300);
   }
 }
@@ -311,8 +311,8 @@ function closeStreakModal() {
 // ── What's New modal (shown once on first visit) ──────────────────────────
 const WHATS_NEW_ITEMS = [
   { icon: '🔥', title: 'Daily Login Streaks',  desc: 'Log in every day to earn 2 bonus coins. Hit 7, 14, or 30 days in a row for a rare card reward!' },
-  { icon: '🃏', title: 'Card Wall',             desc: 'Hang your favorite cards on your dashboard wall — pick up to 4 cards to show off!' },
-  { icon: '📊', title: 'Stats Panel',           desc: 'Your best streak, total correct answers, and sessions completed are now on your home screen.' },
+  { icon: '📖', title: 'Story Quests',          desc: 'Brand-new math adventures with a narrative twist — earn cards while solving story problems!' },
+  { icon: '🔑', title: 'Parent Hub',            desc: 'Set session length, lock operations, toggle visual aids, and manage rewards — all in one place.' },
   { icon: '🎨', title: 'Fresh New Look',        desc: 'Critter Quest has a brand-new logo and polished design across every screen.' },
   { icon: '📧', title: 'Contact Us',            desc: 'Questions or feedback? Reach us anytime at contact@critterquest.org.' },
 ];
@@ -342,7 +342,7 @@ function showWhatsNewModal() {
 }
 
 function dismissWhatsNew() {
-  localStorage.setItem('cq_whats_new_seen_v1', '1');
+  localStorage.setItem('cq_whats_new_seen_v2', '1');
   closeModal();
 }
 
