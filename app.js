@@ -253,7 +253,7 @@ function renderProfiles() {
       <button class="parent-store-btn" onclick="promptParentPin({screen:'parent-hub',data:{}})">⚙️ Parent Hub</button>
     </div>`;
   // Show What's New popup on first ever visit
-  if (!localStorage.getItem('cq_whats_new_seen_v2')) {
+  if (!localStorage.getItem('cq_whats_new_seen_' + WHATS_NEW_VERSION)) {
     setTimeout(showWhatsNewModal, 300);
   }
 }
@@ -309,7 +309,9 @@ function closeStreakModal() {
   nav('dashboard');
 }
 
-// ── What's New modal (shown once on first visit) ──────────────────────────
+// ── What's New modal (shown once per version) ─────────────────────────────
+// Bump WHATS_NEW_VERSION to re-show the modal to all users on next release.
+const WHATS_NEW_VERSION = 'v2';
 const WHATS_NEW_ITEMS = [
   { icon: '🔥', title: 'Daily Login Streaks',  desc: 'Log in every day to earn 2 bonus coins. Hit 7, 14, or 30 days in a row for a rare card reward!' },
   { icon: '📖', title: 'Story Quests',          desc: 'Brand-new math adventures with a narrative twist — earn cards while solving story problems!' },
@@ -343,7 +345,7 @@ function showWhatsNewModal() {
 }
 
 function dismissWhatsNew() {
-  localStorage.setItem('cq_whats_new_seen_v2', '1');
+  localStorage.setItem('cq_whats_new_seen_' + WHATS_NEW_VERSION, '1');
   closeModal();
 }
 
