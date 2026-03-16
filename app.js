@@ -2157,10 +2157,12 @@ function selectHubProfile(id) {
 async function saveHubSetting(field, value) {
   if (!_hubProfileId) return;
   await updateProfile(_hubProfileId, { [field]: value });
+  logCQ('parent_setting_changed', { field, value: String(value) });
   renderParentHub();
 }
 
 function renderParentHub() {
+  logCQ('parent_hub_opened');
   const profiles = getProfiles();
   if (!profiles.length) { nav('profiles'); return; }
   if (!_hubProfileId || !profiles.find(p => p.id === _hubProfileId)) {
@@ -2326,6 +2328,7 @@ async function pickMascot(themeKey, emoji) {
   if (!p) return;
   const tc = { ...p.themeCreatures, [themeKey]: emoji };
   await updateProfile(p.id, { themeCreatures: tc });
+  logCQ('mascot_changed', { theme: themeKey, grade: p.grade });
   _themePicking = null;
   renderThemes();
   renderHeader();
@@ -2335,6 +2338,7 @@ async function switchTheme(themeKey) {
   const p = getActiveProfile();
   if (!p) return;
   await updateProfile(p.id, { theme: themeKey });
+  logCQ('theme_changed', { theme: themeKey, grade: p.grade });
   applyTheme(themeKey, G.op);
   renderThemes();
   renderHeader();
@@ -2407,6 +2411,7 @@ const JOURNEY_MAPS = {
 function renderJourney() {
   const p = getActiveProfile();
   if (!p) { nav('dashboard'); return; }
+  logCQ('journey_viewed', { theme: p.theme, grade: p.grade });
 
   const theme   = p.theme;
   const stops   = JOURNEY_MAPS[theme];
