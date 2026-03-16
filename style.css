@@ -2051,3 +2051,55 @@ body {
   .hub-toggle-group { flex-wrap: wrap; }
   .hub-select       { width: 100%; }
 }
+
+/* ── Hub action buttons ── */
+.hub-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.hub-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: #fff;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, box-shadow .15s;
+}
+.hub-action-btn:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,.08);
+}
+
+.hub-action-icon { font-size: 1.5rem; flex-shrink: 0; }
+
+.hub-action-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 2px;
+}
+.hub-action-name {
+  font-size: .95rem;
+  font-weight: 800;
+  color: #1e293b;
+}
+.hub-action-desc {
+  font-size: .78rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.hub-action-arrow {
+  font-size: 1.4rem;
+  color: #cbd5e1;
+  font-weight: 700;
+  flex-shrink: 0;
+}
