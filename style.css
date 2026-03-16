@@ -105,6 +105,16 @@ body {
 .hdr-coins-btn:hover  { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(217,119,6,.2); }
 .hdr-coins-btn:active { transform: translateY(0); }
 
+.hdr-parent-btn {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 0.75rem; color: #94a3b8; background: transparent;
+  border: 1.5px solid #e2e8f0; border-radius: 20px;
+  padding: 5px 10px; cursor: pointer; white-space: nowrap;
+  transition: all .15s; flex-shrink: 0;
+}
+.hdr-parent-btn:hover  { color: #475569; border-color: #94a3b8; background: #f8fafc; }
+.hdr-parent-btn:active { transform: scale(0.96); }
+
 .hdr-feedback-btn {
   width: 36px; height: 36px; border-radius: 50%;
   border: none; background: #F1F5F9; font-size: 1rem;
