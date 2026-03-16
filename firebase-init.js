@@ -26,6 +26,9 @@ firebase.initializeApp(firebaseConfig);
 const auth      = firebase.auth();
 const db        = firebase.firestore();
 const analytics = firebase.analytics();
+if (localStorage.getItem('cq_dev_mode') === '1') {
+  analytics.setAnalyticsCollectionEnabled(false);
+}
 initFirestore(db);  // hand instance to data.js
 
 // ── Analytics helper ──────────────────────────
