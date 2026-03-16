@@ -445,61 +445,48 @@ function renderDashboard() {
   const p = getActiveProfile();
   if (!p) { nav('profiles'); return; }
   const storeCount = getStore().length;
-  const wallCards  = p.wallCards || [null, null, null, null];
-  const decos      = THEME_WALL_DECOS[p.theme] || [];
-
-  // Build wall card slots
-  const wallSlotsHtml = wallCards.map((cardId, i) => {
-    const card = cardId ? p.inventory.find(c => c.id === cardId) : null;
-    if (card) {
-      const col = RARITY_COLORS[card.rarity] || '#64748B';
-      return `<div class="wall-slot filled" style="border-color:${col}" onclick="openWallCardPicker(${i})">
-        <div class="ws-emoji">${card.emoji}</div>
-        <div class="ws-name">${esc(card.name)}</div>
-        <div class="ws-rarity" style="color:${col}">${card.rarity}</div>
-      </div>`;
-    }
-    return `<div class="wall-slot empty" onclick="openWallCardPicker(${i})">
-      <div class="ws-plus">＋</div>
-      <div class="ws-hint">Add a card</div>
-    </div>`;
-  }).join('');
-
-  // Build decorative background emojis
-  const decoHtml = decos.map((e, i) =>
-    `<span class="wall-deco-item" style="--di:${i}">${e}</span>`
-  ).join('');
+  const j = (p.journeys && p.journeys[p.theme]) || { chapter: 1, stopsCompleted: 0 };
 
   document.getElementById('screen-dashboard').innerHTML = `
-    <div class="dash-layout">
+    <div class="page-wrap">
 
-      <!-- Left: card wall -->
-      <aside class="dash-wall" data-theme="${p.theme}">
-        <div class="wall-decos">${decoHtml}</div>
-        <div class="wall-inner">
-          <div class="wall-title">🎨 My Wall</div>
-          <div class="wall-slots">${wallSlotsHtml}</div>
+      <div class="dash-welcome">
+        <button class="dash-mascot" onclick="showMascotModal()" title="Change your mascot">
+          ${p.themeCreatures[p.theme]}
+          <span class="dash-mascot-hint">✏️</span>
+        </button>
+        <div class="dash-welcome-text">
+          <h1>Hi, ${esc(p.name)}! 👋 <button class="name-edit-btn" onclick="showRenameModal()" title="Edit name">✏️</button></h1>
+          <p>${p.stats.sessionsCompleted} quests · ${p.stats.totalCorrect} correct · Best streak ${p.stats.bestStreak}</p>
         </div>
-      </aside>
+      </div>
 
-      <!-- Center: main content -->
-      <div class="page-wrap">
-        <div class="dash-welcome">
-          <button class="dash-mascot" onclick="showMascotModal()" title="Change your mascot">
-            ${p.themeCreatures[p.theme]}
-            <span class="dash-mascot-hint">✏️</span>
-          </button>
-          <div class="dash-welcome-text">
-            <h1>Hi, ${esc(p.name)}! 👋 <button class="name-edit-btn" onclick="showRenameModal()" title="Edit name">✏️</button></h1>
-            <p>${p.stats.sessionsCompleted} quests · ${p.stats.totalCorrect} correct · Best streak ${p.stats.bestStreak}</p>
-          </div>
-        </div>
+      <!-- Learn -->
+      <div class="dash-section">
+        <div class="dash-section-label">📚 Learn</div>
         <div class="dash-grid">
           <button class="dash-card accent wide" onclick="nav('quest-select')">
             <div class="dc-icon">⚔️</div>
-            <div class="dc-label">Quests</div>
+            <div class="dc-label">Traditional Quests</div>
             <div class="dc-sub">Start learning — ${p.sessionLength ?? 10} questions per quest!</div>
           </button>
+          <button class="dash-card" onclick="nav('story-select')">
+            <div class="dc-icon">📖</div>
+            <div class="dc-label">Story Quests</div>
+            <div class="dc-sub">Math adventures with a twist!</div>
+          </button>
+          <button class="dash-card" onclick="nav('journey')">
+            <div class="dc-icon">🗺️</div>
+            <div class="dc-label">Journey</div>
+            <div class="dc-sub">Chapter ${j.chapter} · Stop ${j.stopsCompleted}/10</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- My Stuff -->
+      <div class="dash-section">
+        <div class="dash-section-label">🎒 My Stuff</div>
+        <div class="dash-grid">
           <button class="dash-card" onclick="nav('inventory')">
             <div class="dc-icon">🎒</div>
             <div class="dc-label">Inventory</div>
@@ -510,48 +497,15 @@ function renderDashboard() {
             <div class="dc-label">Coins</div>
             <div class="dc-sub">${p.coins} available</div>
           </button>
-          <button class="dash-card" onclick="nav('store')">
+          <button class="dash-card wide" onclick="nav('store')">
             <div class="dc-icon">🏪</div>
             <div class="dc-label">Store</div>
             <div class="dc-sub">${storeCount} reward${storeCount !== 1 ? 's' : ''}</div>
           </button>
-          <button class="dash-card" onclick="nav('themes')">
-            <div class="dc-icon">${THEMES[p.theme].icon}</div>
-            <div class="dc-label">Themes</div>
-            <div class="dc-sub">${THEMES[p.theme].name} — ${p.themeCreatures[p.theme]}</div>
-          </button>
-          <button class="dash-card wide" onclick="nav('journey')">
-            ${(() => {
-              const j = (p.journeys && p.journeys[p.theme]) || { chapter: 1, stopsCompleted: 0 };
-              return `<div class="dc-icon">🗺️</div>
-              <div class="dc-label">Journey</div>
-              <div class="dc-sub">Chapter ${j.chapter} · Stop ${j.stopsCompleted}/10</div>`;
-            })()}
-          </button>
-          <button class="dash-card wide" onclick="nav('story-select')">
-            <div class="dc-icon">📖</div>
-            <div class="dc-label">Story Quests</div>
-            <div class="dc-sub">Math adventures with a twist!</div>
-          </button>
-          <button class="dash-card" onclick="promptParentPin({screen:'parent-hub',data:{}})">
-            <div class="dc-icon">🔑</div>
-            <div class="dc-label">Parent Hub</div>
-            <div class="dc-sub">Controls &amp; Rewards</div>
-          </button>
         </div>
-        <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
       </div>
 
-      <!-- Right: stats -->
-      <aside class="dash-stats">
-        <div class="stats-title">📊 My Stats</div>
-        <div class="stat-row"><span class="stat-icon">🔥</span><span class="stat-val">${p.loginStreak || 0}</span><span class="stat-lbl">day streak</span></div>
-        <div class="stat-row"><span class="stat-icon">⚔️</span><span class="stat-val">${p.stats.sessionsCompleted}</span><span class="stat-lbl">quests done</span></div>
-        <div class="stat-row"><span class="stat-icon">✅</span><span class="stat-val">${p.stats.totalCorrect}</span><span class="stat-lbl">correct</span></div>
-        <div class="stat-row"><span class="stat-icon">⭐</span><span class="stat-val">${p.stats.bestStreak}</span><span class="stat-lbl">best streak</span></div>
-        <div class="stat-row"><span class="stat-icon">🪙</span><span class="stat-val">${p.coins}</span><span class="stat-lbl">coins</span></div>
-      </aside>
-
+      <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
     </div>`;
 }
 
