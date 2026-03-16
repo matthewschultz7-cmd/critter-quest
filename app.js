@@ -498,7 +498,7 @@ function renderDashboard() {
           <button class="dash-card accent wide" onclick="nav('quest-select')">
             <div class="dc-icon">⚔️</div>
             <div class="dc-label">Quests</div>
-            <div class="dc-sub">Start learning — 10 questions per quest!</div>
+            <div class="dc-sub">Start learning — ${p.sessionLength ?? 10} questions per quest!</div>
           </button>
           <button class="dash-card" onclick="nav('inventory')">
             <div class="dc-icon">🎒</div>
