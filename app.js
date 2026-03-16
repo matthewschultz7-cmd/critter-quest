@@ -711,7 +711,7 @@ function renderQuestGame() {
 
       <!-- Session progress -->
       <div class="session-bar">
-        <span class="session-label" id="sess-label">Question 1 / 10</span>
+        <span class="session-label" id="sess-label">Question 1 / ${p.sessionLength ?? 10}</span>
         <div class="session-progress"><div class="session-progress-fill" id="sess-fill" style="width:0%"></div></div>
         <span class="session-coins" id="sess-coins">🪙 0</span>
       </div>
