@@ -213,6 +213,11 @@ async function createProfile(name, grade, theme) {
     loginStreak:    0,
     lastLoginDate:  null,
     wallCards:      [null, null, null, null],
+    // Parent learning controls
+    learningMode:   'guided',   // 'guided' | 'mental'
+    operationLock:  null,       // null | 'addition' | 'subtraction' | 'multiplication' | 'division'
+    sessionLength:  10,         // 5 | 10 | 15
+    visualAids:     true,       // bead bar + ten frame
   };
   _db.profiles.push(profile);
   await _saveProfile(profile);
