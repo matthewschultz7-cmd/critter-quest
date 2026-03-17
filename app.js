@@ -199,6 +199,7 @@ function nav(screenId, data = {}) {
     case 'story-game':   initStoryGame(data); break;
     case 'story-done':   renderStoryDone(data); break;
     case 'parent-hub':   renderParentHub(data); break;
+    case 'friends':      renderFriends(); break;
   }
 }
 
@@ -459,6 +460,7 @@ function renderDashboard() {
         <div class="dash-welcome-text">
           <h1>Hi, ${esc(p.name)}! 👋 <button class="name-edit-btn" onclick="showRenameModal()" title="Edit name">✏️</button></h1>
           <p>${p.stats.sessionsCompleted} quests · ${p.stats.totalCorrect} correct · Best streak ${p.stats.bestStreak}</p>
+          ${p.playerCode ? `<div class="player-code-badge">🎮 Your code: <strong>${esc(p.playerCode)}</strong></div>` : ''}
         </div>
       </div>
 
@@ -503,11 +505,162 @@ function renderDashboard() {
             <div class="dc-label">Store</div>
             <div class="dc-sub">${storeCount} reward${storeCount !== 1 ? 's' : ''}</div>
           </button>
+          <button class="dash-card wide" onclick="nav('friends')">
+            <div class="dc-icon">🏆</div>
+            <div class="dc-label">Friends & Leaderboard</div>
+            <div class="dc-sub">${(p.friends || []).length} friend${(p.friends || []).length !== 1 ? 's' : ''}</div>
+          </button>
         </div>
       </div>
 
       <button class="text-btn" onclick="nav('profiles')">👥 Switch Profile</button>
     </div>`;
+}
+
+// ── Friends & Leaderboard ─────────────────────
+async function renderFriends() {
+  const p = getActiveProfile();
+  if (!p) { nav('profiles'); return; }
+  const el = document.getElementById('screen-friends');
+  el.innerHTML = `<div class="page-wrap"><div class="loading-spinner" style="margin:3rem auto"></div></div>`;
+
+  const friendIds = p.friends || [];
+  let friendsData = [];
+  try { friendsData = await getFriendsStats(friendIds); } catch (e) { /* show empty */ }
+
+  const me = {
+    profileId:         p.id,
+    profileName:       p.name,
+    playerCode:        p.playerCode || '',
+    totalCorrect:      p.stats.totalCorrect,
+    sessionsCompleted: p.stats.sessionsCompleted,
+    bestStreak:        p.stats.bestStreak,
+    coinsEarned:       p.coinsEarned || 0,
+    isMe:              true,
+  };
+  const all = [me, ...friendsData.map(f => ({ ...f, isMe: false }))];
+  all.sort((a, b) => b.totalCorrect - a.totalCorrect);
+
+  const rows = all.map((f, i) => {
+    const rank    = i + 1;
+    const medal   = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
+    const rowCls  = f.isMe ? 'leaderboard-row is-me' : 'leaderboard-row';
+    const removeBtn = !f.isMe
+      ? `<button class="lb-remove-btn" onclick="confirmRemoveFriend('${f.profileId}')" title="Remove friend">✕</button>`
+      : '';
+    return `
+      <div class="${rowCls}">
+        <div class="lb-rank">${medal}</div>
+        <div class="lb-name">${esc(f.profileName)}${f.isMe ? ' <span class="lb-you">(you)</span>' : ''}</div>
+        <div class="lb-stat"><span class="lb-stat-val">${f.totalCorrect}</span><span class="lb-stat-lbl">correct</span></div>
+        <div class="lb-stat"><span class="lb-stat-val">${f.sessionsCompleted}</span><span class="lb-stat-lbl">quests</span></div>
+        <div class="lb-stat"><span class="lb-stat-val">${f.bestStreak}</span><span class="lb-stat-lbl">streak</span></div>
+        <div class="lb-stat"><span class="lb-stat-val">${f.coinsEarned}</span><span class="lb-stat-lbl">coins</span></div>
+        ${removeBtn}
+      </div>`;
+  }).join('');
+
+  const emptyMsg = friendIds.length === 0
+    ? `<p class="lb-empty">Add friends using their player code to start competing!</p>`
+    : '';
+
+  el.innerHTML = `
+    <div class="page-wrap">
+      <div class="lb-header">
+        <h2>🏆 Friends &amp; Leaderboard</h2>
+        <button class="primary-btn" onclick="showAddFriendModal()">+ Add Friend</button>
+      </div>
+      ${p.playerCode ? `<div class="lb-my-code">Your code: <strong>${esc(p.playerCode)}</strong> — share it with friends!</div>` : ''}
+      <div class="lb-col-heads">
+        <div></div><div></div>
+        <div>Correct</div><div>Quests</div><div>Streak</div><div>Coins</div><div></div>
+      </div>
+      <div class="leaderboard-list">${rows}</div>
+      ${emptyMsg}
+      <button class="text-btn" style="margin-top:1rem" onclick="nav('dashboard')">← Back</button>
+    </div>`;
+}
+
+function showAddFriendModal() {
+  showModal(`
+    <div class="modal-title">➕ Add a Friend</div>
+    <p class="modal-text">Ask your friend for their player code (shown on their dashboard).</p>
+    <input type="text" id="friend-code-input" class="join-input"
+      placeholder="e.g. FROG-42" maxlength="10"
+      autocomplete="off" autocapitalize="characters"
+      style="margin:0.75rem 0" />
+    <div id="friend-search-result"></div>
+    <div class="modal-btns" style="margin-top:0.75rem">
+      <button class="text-btn" onclick="closeModal()">Cancel</button>
+      <button class="primary-btn" onclick="searchFriendCode()">Find Friend</button>
+    </div>`);
+  setTimeout(() => {
+    const inp = document.getElementById('friend-code-input');
+    if (inp) {
+      inp.focus();
+      inp.addEventListener('keydown', e => { if (e.key === 'Enter') searchFriendCode(); });
+    }
+  }, 50);
+}
+
+async function searchFriendCode() {
+  const p    = getActiveProfile();
+  const inp  = document.getElementById('friend-code-input');
+  const code = (inp?.value || '').trim().toUpperCase();
+  const res  = document.getElementById('friend-search-result');
+  if (!code || !res) return;
+
+  res.innerHTML = `<div style="text-align:center;padding:8px"><div class="loading-spinner" style="margin:0 auto"></div></div>`;
+  const found = await findProfileByCode(code);
+
+  if (!found) {
+    res.innerHTML = `<div class="join-error">Code not found. Check and try again!</div>`;
+    return;
+  }
+  if (found.profileId === p.id) {
+    res.innerHTML = `<div class="join-error">That's your own code!</div>`;
+    return;
+  }
+  if ((p.friends || []).includes(found.profileId)) {
+    res.innerHTML = `<div class="join-error">${esc(found.profileName)} is already your friend!</div>`;
+    return;
+  }
+
+  res.innerHTML = `
+    <div class="friend-found-card">
+      <div class="friend-found-name">${esc(found.profileName)}</div>
+      <div class="friend-found-stats">${found.totalCorrect} correct · ${found.sessionsCompleted} quests</div>
+      <button class="primary-btn" style="margin-top:0.5rem;width:100%"
+        onclick="confirmAddFriend('${found.profileId}', '${esc(found.profileName)}')">
+        Add ${esc(found.profileName)}!
+      </button>
+    </div>`;
+}
+
+async function confirmAddFriend(friendId, friendName) {
+  const p = getActiveProfile();
+  await addFriend(p.id, friendId);
+  closeModal();
+  renderFriends();
+}
+
+function confirmRemoveFriend(friendId) {
+  const p    = getActiveProfile();
+  const info = document.querySelector(`.leaderboard-row:not(.is-me) .lb-name`);
+  showModal(`
+    <div class="modal-title">Remove Friend?</div>
+    <p class="modal-text">They'll be removed from your leaderboard. You can re-add them anytime.</p>
+    <div class="modal-btns" style="margin-top:1rem">
+      <button class="text-btn" onclick="closeModal()">Cancel</button>
+      <button class="danger-btn" onclick="doRemoveFriend('${friendId}')">Remove</button>
+    </div>`);
+}
+
+async function doRemoveFriend(friendId) {
+  const p = getActiveProfile();
+  await removeFriend(p.id, friendId);
+  closeModal();
+  renderFriends();
 }
 
 // ── Wall card picker ───────────────────────────

@@ -16,9 +16,14 @@ service cloud.firestore {
       allow create: if request.auth != null;
     }
 
-    // Top-level profile index — authenticated users can create/update their own records
+    // Top-level profile index — readable for leaderboard, writable for own records
     match /profiles/{profileId} {
-      allow create, update: if request.auth != null;
+      allow read, create, update: if request.auth != null;
+    }
+
+    // Player code lookup (for adding friends)
+    match /playerCodes/{code} {
+      allow read, create: if request.auth != null;
     }
 
     // Join code index — readable by anyone authenticated

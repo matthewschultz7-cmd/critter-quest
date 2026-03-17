@@ -77,6 +77,15 @@ function renameKnownFamily(familyId, nickname) {
   if (f) { f.nickname = nickname; _saveKnownFamilies(list); }
 }
 
+// Generate a friendly player code like "FROG-42" (different pool from join codes)
+function generatePlayerCode() {
+  const animals = ['FROG','BEAR','WOLF','DEER','FISH','CROW','DUCK','HAWK',
+                   'LYNX','MOLE','NEWT','PUMA','TOAD','WREN','IBIS'];
+  const word = animals[Math.floor(Math.random() * animals.length)];
+  const num  = Math.floor(Math.random() * 90) + 10;
+  return `${word}-${num}`;
+}
+
 // Generate a friendly join code like "TIGER-42"
 function generateJoinCode() {
   const words = ['TIGER','EAGLE','PANDA','KOALA','OTTER','GECKO',
@@ -203,6 +212,7 @@ function setActiveProfile(id) {
 
 async function createProfile(name, grade, theme) {
   const defaultMascots = { forest:'🐱', ocean:'🐠', farm:'🐔', jungle:'🦁', arctic:'🐧' };
+  const playerCode = generatePlayerCode();
   const profile = {
     id:             'p_' + Date.now(),
     name,
@@ -210,6 +220,7 @@ async function createProfile(name, grade, theme) {
     theme,
     themeCreatures: { ...defaultMascots },
     coins:          0,
+    coinsEarned:    0,
     flair:          [null, null, null],
     inventory:      [],
     transactions:   [],
@@ -219,6 +230,8 @@ async function createProfile(name, grade, theme) {
     loginStreak:    0,
     lastLoginDate:  null,
     wallCards:      [null, null, null, null],
+    playerCode,
+    friends:        [],
     // Parent learning controls
     learningMode:   'guided',   // 'guided' | 'mental'
     operationLock:  null,       // null | 'addition' | 'subtraction' | 'multiplication' | 'division'
@@ -228,11 +241,17 @@ async function createProfile(name, grade, theme) {
   _db.profiles.push(profile);
   await _saveProfile(profile);
   if (_firestore && _db.familyId) {
+    await _firestore.collection('playerCodes').doc(playerCode).set({ profileId: profile.id });
     await _firestore.collection('profiles').doc(profile.id).set({
-      profileName: profile.name,
-      familyId:    _db.familyId,
-      joinCode:    _db.joinCode,
-      createdAt:   new Date().toISOString(),
+      profileName:       profile.name,
+      familyId:          _db.familyId,
+      joinCode:          _db.joinCode,
+      createdAt:         new Date().toISOString(),
+      playerCode,
+      totalCorrect:      0,
+      sessionsCompleted: 0,
+      bestStreak:        0,
+      coinsEarned:       0,
     });
   }
   return profile;
@@ -257,6 +276,69 @@ async function backfillProfiles() {
   console.log(`backfillProfiles: wrote ${count} profile(s) for family ${_db.familyId}`);
 }
 
+// ── Friends ────────────────────────────────────
+async function findProfileByCode(playerCode) {
+  if (!_firestore) return null;
+  const clean = playerCode.trim().toUpperCase();
+  const codeSnap = await _firestore.collection('playerCodes').doc(clean).get();
+  if (!codeSnap.exists) return null;
+  const { profileId } = codeSnap.data();
+  const profSnap = await _firestore.collection('profiles').doc(profileId).get();
+  if (!profSnap.exists) return null;
+  return { profileId, ...profSnap.data() };
+}
+
+async function addFriend(profileId, friendProfileId) {
+  const p = _db.profiles.find(p => p.id === profileId);
+  if (!p) return;
+  if (!p.friends) p.friends = [];
+  if (!p.friends.includes(friendProfileId)) {
+    p.friends.push(friendProfileId);
+    await _saveProfile(p);
+  }
+}
+
+async function removeFriend(profileId, friendProfileId) {
+  const p = _db.profiles.find(p => p.id === profileId);
+  if (!p) return;
+  p.friends = (p.friends || []).filter(id => id !== friendProfileId);
+  await _saveProfile(p);
+}
+
+async function getFriendsStats(friendIds) {
+  if (!_firestore || !friendIds.length) return [];
+  const snaps = await Promise.all(
+    friendIds.map(id => _firestore.collection('profiles').doc(id).get())
+  );
+  return snaps
+    .filter(s => s.exists)
+    .map(s => ({ profileId: s.id, ...s.data() }));
+}
+
+// One-time backfill: adds playerCode + stats to top-level profiles docs for
+// profiles that predate the friends feature. Call from browser console.
+async function backfillPlayerCodes() {
+  if (!_firestore || !_db.familyId) { console.warn('backfillPlayerCodes: no family loaded'); return; }
+  let count = 0;
+  for (const p of _db.profiles) {
+    if (!p.playerCode) {
+      p.playerCode = generatePlayerCode();
+      await _saveProfile(p);
+      await _firestore.collection('playerCodes').doc(p.playerCode).set({ profileId: p.id });
+    }
+    await _firestore.collection('profiles').doc(p.id).set({
+      playerCode:        p.playerCode,
+      totalCorrect:      p.stats.totalCorrect,
+      sessionsCompleted: p.stats.sessionsCompleted,
+      bestStreak:        p.stats.bestStreak,
+      coinsEarned:       p.coinsEarned || 0,
+    }, { merge: true });
+    count++;
+    console.log(`backfillPlayerCodes: ${p.name} → ${p.playerCode}`);
+  }
+  console.log(`Done! Updated ${count} profile(s).`);
+}
+
 async function updateProfile(id, changes) {
   const idx = _db.profiles.findIndex(p => p.id === id);
   if (idx === -1) return null;
@@ -279,8 +361,12 @@ async function addCoins(profileId, amount, reason) {
   const p = _db.profiles.find(p => p.id === profileId);
   if (!p) return;
   p.coins += amount;
+  p.coinsEarned = (p.coinsEarned || 0) + amount;
   p.transactions.unshift({ id: 't_' + Date.now(), type: 'earn', amount, reason, date: new Date().toISOString() });
   await _saveProfile(p);
+  if (_firestore && p.id) {
+    _firestore.collection('profiles').doc(p.id).update({ coinsEarned: p.coinsEarned }).catch(() => {});
+  }
 }
 
 async function spendCoins(profileId, amount, reason) {
@@ -331,6 +417,13 @@ async function updateStats(profileId, correct, attempted, streak) {
   p.stats.sessionsCompleted += 1;
   if (streak > p.stats.bestStreak) p.stats.bestStreak = streak;
   await _saveProfile(p);
+  if (_firestore && p.id) {
+    _firestore.collection('profiles').doc(p.id).update({
+      totalCorrect:      p.stats.totalCorrect,
+      sessionsCompleted: p.stats.sessionsCompleted,
+      bestStreak:        p.stats.bestStreak,
+    }).catch(() => {});
+  }
 }
 
 // ── Store ─────────────────────────────────────
