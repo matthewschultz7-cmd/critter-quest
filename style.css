@@ -2225,3 +2225,15 @@ body {
 }
 .friend-found-name  { font-weight: 900; font-size: 1.1rem; color: #1E293B; }
 .friend-found-stats { font-size: 0.85rem; color: #64748B; margin-top: 2px; }
+
+.lb-claim-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-top: 1rem;
+}
+.lb-claim-icon  { font-size: 3rem; margin-bottom: 0.5rem; }
+.lb-claim-title { font-weight: 900; font-size: 1.3rem; color: #1E293B; margin-bottom: 0.5rem; }
+.lb-claim-sub   { color: #64748B; font-size: 0.9rem; margin-bottom: 1.25rem; }

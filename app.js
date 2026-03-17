@@ -526,6 +526,22 @@ async function renderFriends() {
   const el = document.getElementById('screen-friends');
   el.innerHTML = `<div class="page-wrap"><div class="loading-spinner" style="margin:3rem auto"></div></div>`;
 
+  // Existing profiles may not have a player code yet — let them claim one in-app
+  if (!p.playerCode) {
+    el.innerHTML = `
+      <div class="page-wrap">
+        <div class="lb-header"><h2>🏆 Friends &amp; Leaderboard</h2></div>
+        <div class="lb-claim-card">
+          <div class="lb-claim-icon">🎮</div>
+          <div class="lb-claim-title">Get your player code!</div>
+          <p class="lb-claim-sub">A player code lets friends find you and adds you to their leaderboard. Takes one tap!</p>
+          <button class="primary-btn big" onclick="claimPlayerCode()">Generate My Code</button>
+        </div>
+        <button class="text-btn" style="margin-top:1rem" onclick="nav('dashboard')">← Back</button>
+      </div>`;
+    return;
+  }
+
   const friendIds = p.friends || [];
   let friendsData = [];
   try { friendsData = await getFriendsStats(friendIds); } catch (e) { /* show empty */ }
@@ -581,6 +597,14 @@ async function renderFriends() {
       ${emptyMsg}
       <button class="text-btn" style="margin-top:1rem" onclick="nav('dashboard')">← Back</button>
     </div>`;
+}
+
+async function claimPlayerCode() {
+  const p = getActiveProfile();
+  const btn = document.querySelector('#screen-friends .primary-btn');
+  if (btn) { btn.textContent = 'Generating…'; btn.disabled = true; }
+  await assignPlayerCode(p.id);
+  renderFriends();
 }
 
 function showAddFriendModal() {

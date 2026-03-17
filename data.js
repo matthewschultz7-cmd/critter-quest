@@ -288,6 +288,28 @@ async function findProfileByCode(playerCode) {
   return { profileId, ...profSnap.data() };
 }
 
+// Assign a player code to an existing profile that doesn't have one yet.
+async function assignPlayerCode(profileId) {
+  const p = _db.profiles.find(p => p.id === profileId);
+  if (!p || p.playerCode) return p?.playerCode || null;
+  const code = generatePlayerCode();
+  p.playerCode = code;
+  if (!p.friends)     p.friends     = [];
+  if (!p.coinsEarned) p.coinsEarned = 0;
+  await _saveProfile(p);
+  if (_firestore && _db.familyId) {
+    await _firestore.collection('playerCodes').doc(code).set({ profileId });
+    await _firestore.collection('profiles').doc(profileId).set({
+      playerCode:        code,
+      totalCorrect:      p.stats.totalCorrect,
+      sessionsCompleted: p.stats.sessionsCompleted,
+      bestStreak:        p.stats.bestStreak,
+      coinsEarned:       p.coinsEarned,
+    }, { merge: true });
+  }
+  return code;
+}
+
 async function addFriend(profileId, friendProfileId) {
   const p = _db.profiles.find(p => p.id === profileId);
   if (!p) return;
