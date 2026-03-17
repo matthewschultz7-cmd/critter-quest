@@ -2125,3 +2125,103 @@ body {
   font-weight: 700;
   flex-shrink: 0;
 }
+
+
+/* ── Friends & Leaderboard ── */
+.lb-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+.lb-header h2 { font-size: 1.4rem; font-weight: 900; color: #1E293B; }
+
+.lb-my-code {
+  font-size: 0.85rem;
+  color: #64748B;
+  background: #F1F5F9;
+  border-radius: 8px;
+  padding: 6px 12px;
+  margin-bottom: 1rem;
+}
+.lb-my-code strong { color: #1E293B; }
+
+.player-code-badge {
+  font-size: 0.8rem;
+  color: #64748B;
+  margin-top: 4px;
+}
+.player-code-badge strong { color: #1E293B; }
+
+.lb-col-heads {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 4.5rem 4.5rem 4.5rem 4.5rem 2rem;
+  gap: 4px;
+  padding: 0 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #94A3B8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+
+.leaderboard-list { display: flex; flex-direction: column; gap: 6px; }
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 2.5rem 1fr 4.5rem 4.5rem 4.5rem 4.5rem 2rem;
+  gap: 4px;
+  align-items: center;
+  background: #fff;
+  border-radius: 12px;
+  padding: 10px 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.leaderboard-row.is-me {
+  background: linear-gradient(135deg, #EFF6FF, #F0FDF4);
+  border: 2px solid var(--accent, #22C55E);
+}
+
+.lb-rank { font-size: 1.1rem; text-align: center; }
+.lb-name { font-weight: 800; font-size: 0.9rem; color: #1E293B; }
+.lb-you  { font-weight: 600; font-size: 0.75rem; color: #94A3B8; }
+
+.lb-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.lb-stat-val  { font-weight: 800; font-size: 0.95rem; color: #1E293B; }
+.lb-stat-lbl  { font-size: 0.65rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; }
+
+.lb-remove-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: #CBD5E1;
+  padding: 4px;
+  border-radius: 50%;
+  line-height: 1;
+}
+.lb-remove-btn:hover { color: #EF4444; background: #FEF2F2; }
+
+.lb-empty {
+  text-align: center;
+  color: #94A3B8;
+  font-size: 0.9rem;
+  padding: 2rem 1rem;
+}
+
+.friend-found-card {
+  background: #F0FDF4;
+  border: 2px solid #22C55E;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  margin-top: 8px;
+}
+.friend-found-name  { font-weight: 900; font-size: 1.1rem; color: #1E293B; }
+.friend-found-stats { font-size: 0.85rem; color: #64748B; margin-top: 2px; }
