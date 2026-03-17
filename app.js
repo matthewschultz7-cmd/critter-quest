@@ -486,6 +486,18 @@ function renderDashboard() {
         </div>
       </div>
 
+      <!-- Friends -->
+      <div class="dash-section">
+        <div class="dash-section-label">🏆 Friends</div>
+        <div class="dash-grid">
+          <button class="dash-card accent wide" onclick="nav('friends')">
+            <div class="dc-icon">🏆</div>
+            <div class="dc-label">Friends &amp; Leaderboard</div>
+            <div class="dc-sub">${(p.friends || []).length} friend${(p.friends || []).length !== 1 ? 's' : ''} competing</div>
+          </button>
+        </div>
+      </div>
+
       <!-- My Stuff -->
       <div class="dash-section">
         <div class="dash-section-label">🎒 My Stuff</div>
@@ -504,11 +516,6 @@ function renderDashboard() {
             <div class="dc-icon">🏪</div>
             <div class="dc-label">Store</div>
             <div class="dc-sub">${storeCount} reward${storeCount !== 1 ? 's' : ''}</div>
-          </button>
-          <button class="dash-card wide" onclick="nav('friends')">
-            <div class="dc-icon">🏆</div>
-            <div class="dc-label">Friends & Leaderboard</div>
-            <div class="dc-sub">${(p.friends || []).length} friend${(p.friends || []).length !== 1 ? 's' : ''}</div>
           </button>
         </div>
       </div>
