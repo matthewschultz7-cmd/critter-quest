@@ -10,6 +10,12 @@
 //      profiles:  subcollection
 //        {profileId}/  (all profile fields)
 //
+//    profiles/{profileId}/
+//      profileName: string
+//      familyId:    string
+//      joinCode:    string
+//      createdAt:   string (ISO)
+//
 //  How join codes work:
 //    - familyCodes/{joinCode} → { familyId }  (lookup index)
 //    - Device stores familyId in localStorage (just the ID, not the data)
@@ -221,7 +227,34 @@ async function createProfile(name, grade, theme) {
   };
   _db.profiles.push(profile);
   await _saveProfile(profile);
+  if (_firestore && _db.familyId) {
+    await _firestore.collection('profiles').doc(profile.id).set({
+      profileName: profile.name,
+      familyId:    _db.familyId,
+      joinCode:    _db.joinCode,
+      createdAt:   new Date().toISOString(),
+    });
+  }
   return profile;
+}
+
+// One-time backfill: writes top-level profiles/{id} for all profiles in the
+// currently-loaded family. Safe to re-run (uses merge). Call from browser console.
+async function backfillProfiles() {
+  if (!_firestore || !_db.familyId) { console.warn('backfillProfiles: no family loaded'); return; }
+  let count = 0;
+  for (const p of _db.profiles) {
+    const ts = parseInt(p.id.replace('p_', ''), 10);
+    const createdAt = ts ? new Date(ts).toISOString() : new Date().toISOString();
+    await _firestore.collection('profiles').doc(p.id).set({
+      profileName: p.name,
+      familyId:    _db.familyId,
+      joinCode:    _db.joinCode,
+      createdAt,
+    }, { merge: true });
+    count++;
+  }
+  console.log(`backfillProfiles: wrote ${count} profile(s) for family ${_db.familyId}`);
 }
 
 async function updateProfile(id, changes) {
