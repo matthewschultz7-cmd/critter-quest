@@ -16,6 +16,11 @@ service cloud.firestore {
       allow create: if request.auth != null;
     }
 
+    // Top-level profile index — authenticated users can create/update their own records
+    match /profiles/{profileId} {
+      allow create, update: if request.auth != null;
+    }
+
     // Join code index — readable by anyone authenticated
     match /familyCodes/{code} {
       allow read:   if request.auth != null;
