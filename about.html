@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Critter Quest — Built by a Dad, for His Kids</title>
+  <meta name="description" content="Critter Quest is a free math and reading practice app built by Matthew Schultz for his two kids. No ads, no accounts, no data collection. Free forever." />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://critterquest.org/about" />
+  <meta property="og:title" content="About Critter Quest — Built by a Dad, for His Kids" />
+  <meta property="og:description" content="Critter Quest is a free math and reading practice app built by Matthew Schultz for his two kids. No ads, no accounts, no data collection. Free forever." />
+  <meta property="og:image" content="https://critterquest.org/og-image.png" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="About Critter Quest — Built by a Dad, for His Kids" />
+  <meta name="twitter:description" content="Free math and reading practice app. No ads, no accounts, no data collection. Free forever." />
+  <meta name="twitter:image" content="https://critterquest.org/og-image.png" />
+
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://critterquest.org/about" />
+
+  <!-- Structured data: Person + WebSite -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "AboutPage",
+    "url": "https://critterquest.org/about",
+    "name": "About Critter Quest",
+    "description": "Critter Quest is a free math and reading practice app built by Matthew Schultz for his two kids in the West Ada School District, Idaho.",
+    "mainEntity": {
+      "@type": "WebApplication",
+      "name": "Critter Quest",
+      "url": "https://critterquest.org",
+      "applicationCategory": "EducationalApplication",
+      "isAccessibleForFree": true,
+      "author": {
+        "@type": "Person",
+        "name": "Matthew Schultz"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "student",
+        "suggestedMinAge": "5",
+        "suggestedMaxAge": "10"
+      }
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(160deg, #FFF3E0 0%, #E8F5E9 100%);
+      min-height: 100vh;
+      color: #1E293B;
+    }
+
+    /* ── Nav ── */
+    .site-nav {
+      background: white;
+      box-shadow: 0 2px 12px rgba(0,0,0,.08);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-nav .logo {
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: #1E293B;
+      text-decoration: none;
+    }
+    .site-nav .logo span { color: #22C55E; }
+    .nav-link {
+      background: #22C55E;
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 800;
+      font-size: 0.95rem;
+      padding: 10px 22px;
+      border-radius: 14px;
+      text-decoration: none;
+      transition: background .18s;
+    }
+    .nav-link:hover { background: #16A34A; }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 64px 24px 48px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .hero .mascot { font-size: 5rem; margin-bottom: 16px; }
+    .hero h1 {
+      font-size: clamp(1.8rem, 5vw, 2.8rem);
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+    .hero h1 span { color: #22C55E; }
+    .hero .tagline {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #64748B;
+      max-width: 560px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* ── Badges ── */
+    .badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      padding: 0 24px 48px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .badge {
+      background: white;
+      border: 2px solid #E2E8F0;
+      border-radius: 999px;
+      padding: 8px 18px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      color: #1E293B;
+    }
+    .badge.green  { border-color: #22C55E; color: #16A34A; background: #F0FDF4; }
+    .badge.blue   { border-color: #3B82F6; color: #2563EB; background: #EFF6FF; }
+    .badge.orange { border-color: #F97316; color: #EA580C; background: #FFF7ED; }
+
+    /* ── Sections ── */
+    .section {
+      max-width: 720px;
+      margin: 0 auto 48px;
+      padding: 0 24px;
+    }
+    .card {
+      background: white;
+      border-radius: 24px;
+      padding: 36px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.07);
+    }
+    .card + .card { margin-top: 20px; }
+
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #22C55E;
+      margin-bottom: 8px;
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 900;
+      margin-bottom: 16px;
+      line-height: 1.3;
+    }
+    p {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #475569;
+      line-height: 1.75;
+      margin-bottom: 14px;
+    }
+    p:last-child { margin-bottom: 0; }
+    p strong { color: #1E293B; }
+
+    /* ── Promise grid ── */
+    .promise-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-top: 8px;
+    }
+    .promise-item {
+      background: #F8FAFC;
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+    }
+    .promise-item .icon { font-size: 2rem; margin-bottom: 8px; }
+    .promise-item .label {
+      font-weight: 900;
+      font-size: 0.95rem;
+      color: #1E293B;
+      margin-bottom: 4px;
+    }
+    .promise-item .desc {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #64748B;
+      line-height: 1.4;
+      margin: 0;
+    }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+      padding: 0 24px 80px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .cta-section h2 { font-size: 1.8rem; margin-bottom: 12px; }
+    .cta-section p  { margin-bottom: 28px; }
+    .cta-btn {
+      display: inline-block;
+      background: #22C55E;
+      color: white;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 900;
+      font-size: 1.1rem;
+      padding: 16px 40px;
+      border-radius: 16px;
+      text-decoration: none;
+      transition: background .18s, transform .18s;
+      box-shadow: 0 4px 16px rgba(34,197,94,.35);
+    }
+    .cta-btn:hover { background: #16A34A; transform: translateY(-2px); }
+
+    /* ── Footer ── */
+    .site-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #94A3B8;
+    }
+    .site-footer a { color: #94A3B8; text-decoration: none; }
+    .site-footer a:hover { color: #22C55E; }
+
+    @media (max-width: 480px) {
+      .card { padding: 24px 20px; }
+      .hero  { padding: 40px 16px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="site-nav">
+    <a href="/" class="logo">🐾 Critter <span>Quest</span></a>
+    <a href="/" class="nav-link">▶ Play Free</a>
+  </nav>
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="mascot">🦫</div>
+    <h1>Built by a dad.<br><span>For his kids.</span></h1>
+    <p class="tagline">Critter Quest started as a weekend project and turned into something kids actually want to use. Here's how it happened.</p>
+  </div>
+
+  <!-- Badges -->
+  <div class="badges">
+    <div class="badge green">✓ Free Forever</div>
+    <div class="badge green">✓ No Ads</div>
+    <div class="badge blue">✓ No Account Required</div>
+    <div class="badge blue">✓ No Data Collection</div>
+    <div class="badge orange">✓ Works on Any Device</div>
+    <div class="badge orange">✓ Kindergarten – 3rd Grade</div>
+  </div>
+
+  <!-- Origin Story -->
+  <div class="section">
+    <div class="card">
+      <div class="section-label">The Origin Story</div>
+      <h2>It started with a question and two kids who hate homework</h2>
+      <p>
+        My kids — a 9-year-old and a 6-year-old — are not exactly lining up to practice math.
+        So my son and daughter and I co-created a math practice tool together. It started simple
+        and evolved through questions, feedback, and rapid iteration. We shaped the experience
+        together until it felt <strong>personal, fun, and motivating</strong>.
+      </p>
+      <p>
+        As a parent, the process of creating, validating, learning, and refining in real time
+        was a ton of fun. Watching the app change because of something my kid said was genuinely
+        one of the better parenting experiences I've had.
+      </p>
+      <p>
+        Then something happened that surprised me. My kids started asking me throughout the week
+        if they could <strong>"do the homework thing"</strong> we made together. I know it's mostly
+        because of the rewards in the store — but who cares? They wanted to actually use it.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Why It's Free & Public</div>
+      <h2>I was sick of them using my PC to get to localhost</h2>
+      <p>
+        Have you seen how kids use their iPads? I needed Critter Quest to be somewhere they could
+        actually get to it. So I decided to put it online — which meant I suddenly needed a way
+        to deploy it, a repo, a database, and all the things I didn't know I didn't know.
+      </p>
+      <p>
+        This is exactly where I would have stopped on a side project like this and let it stay
+        a weird idea on my hard drive. But I kept going. And once it was live, it made no sense
+        to keep it private. <strong>If it works for my kids, it might work for yours.</strong>
+      </p>
+      <p>
+        We're starting hyperlocal — built with the <strong>West Ada School District curriculum</strong>
+        in Ada County, Idaho in mind — but Critter Quest is open to every family who wants it.
+        As more kids use it, it'll keep growing.
+      </p>
+    </div>
+  </div>
+
+  <!-- Our Promise -->
+  <div class="section">
+    <div class="card">
+      <div class="section-label">Our Promise to Parents</div>
+      <h2>No surprises. Ever.</h2>
+      <div class="promise-grid">
+        <div class="promise-item">
+          <div class="icon">🚫</div>
+          <div class="label">No Ads</div>
+          <p class="desc">Never was, never will be. Kids see math problems, not pop-ups.</p>
+        </div>
+        <div class="promise-item">
+          <div class="icon">🔒</div>
+          <div class="label">No Data Collection</div>
+          <p class="desc">We don't collect, store, or sell any personal information about your child.</p>
+        </div>
+        <div class="promise-item">
+          <div class="icon">🆓</div>
+          <div class="label">Free Forever</div>
+          <p class="desc">No freemium upsell. No subscription wall. Free now, free always.</p>
+        </div>
+        <div class="promise-item">
+          <div class="icon">👤</div>
+          <div class="label">No Account Needed</div>
+          <p class="desc">Open the app, pick a name, start playing. Done.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Who It's For -->
+  <div class="section">
+    <div class="card">
+      <div class="section-label">Who It's For</div>
+      <h2>Kindergarten and 3rd grade students</h2>
+      <p>
+        Critter Quest is built for elementary school kids, specifically kindergartners and 3rd graders.
+        Younger kids practice <strong>addition, subtraction, sight words, letter sounds, and CVC words</strong>.
+        Older kids tackle <strong>multiplication, division, vocabulary, spelling, and grammar</strong>.
+      </p>
+      <p>
+        Each session is 10 questions. Kids earn coins for correct answers and collect a critter card
+        at the end — chosen from five animal themes: forest, ocean, farm, jungle, and arctic.
+        The reward system is the point. It's what makes them come back.
+      </p>
+      <p>
+        Parents get a PIN-protected store where they can set up real rewards kids can buy with
+        their earned coins. That's the part that made my kids ask to do homework on a Tuesday night.
+      </p>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h2>Give it a try 🐾</h2>
+    <p class="tagline">Free, no account needed, works on any device. Takes about 30 seconds to set up a profile and start a quest.</p>
+    <a href="/" class="cta-btn">▶ Start Playing Free</a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>Built with ☕ and parental desperation by Matthew Schultz &nbsp;·&nbsp;
+    <a href="mailto:contact@critterquest.org">contact@critterquest.org</a> &nbsp;·&nbsp;
+    <a href="/">Back to Critter Quest</a></p>
+  </footer>
+
+</body>
+</html>
