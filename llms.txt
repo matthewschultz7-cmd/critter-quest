@@ -1,0 +1,39 @@
+# Critter Quest
+
+> Free math and reading practice app for kindergarten and 3rd grade students. Kids earn coins and collectible critter cards by answering questions correctly. No account or signup required.
+
+## What is Critter Quest?
+
+Critter Quest is a free, browser-based educational app for elementary school children (ages 5–9). It covers math and reading skills aligned with kindergarten and 3rd grade curricula. Children practice by completing quests (10-question sessions) and are rewarded with virtual coins and collectible critter cards, making learning feel like a game.
+
+## Who is it for?
+
+- Kindergarten students (ages 5–6): addition with sums up to 10, subtraction with non-negative differences, sight words, letter sounds, word building (CVC words)
+- 3rd grade students (ages 8–9): addition up to 500, subtraction up to 999, multiplication (1–12 times tables), division (whole number quotients), vocabulary, spelling, grammar
+- Parents looking for free at-home math and reading reinforcement
+- Teachers seeking a no-signup classroom supplement
+
+## Key Features
+
+- Free to use — no account, no subscription, no ads
+- Works in any browser — no app download required
+- Step-by-step scaffolded math problems guide kids through the thinking process
+- Reading quests cover sight words, letter sounds, vocabulary, spelling, and grammar
+- Kids earn coins for correct answers and collectible critter cards at the end of each session
+- 5 animal themes: forest, ocean, farm, jungle, arctic
+- Parent controls: store editor, PIN protection, reward management
+- Supports multiple child profiles on one device (family-friendly)
+- Built for West Ada School District curriculum (Ada County, Idaho) but usable anywhere
+
+## Subjects Covered
+
+- Math: addition, subtraction, multiplication, division, mixed operations
+- Reading: sight words (Dolch list), letter sounds, CVC word building, vocabulary, spelling, grammar
+
+## URL
+
+https://critterquest.org
+
+## Contact
+
+contact@critterquest.org

@@ -52,6 +52,80 @@
   }
   </script>
 
+  <!-- Structured data: FAQ (AEO — AI engines pull these as direct answers) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is Critter Quest?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Critter Quest is a free, browser-based math and reading practice app for kindergarten and 3rd grade students (ages 5–9). Kids answer questions to earn coins and collectible critter cards. No account or download required."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is Critter Quest free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Critter Quest is completely free to use. There is no subscription, no in-app purchases, and no ads. Just open critterquest.org in any browser and start playing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What grade levels does Critter Quest support?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Critter Quest supports kindergarten (ages 5–6) and 3rd grade (ages 8–9). Kindergartners practice addition and subtraction, sight words, letter sounds, and CVC words. 3rd graders practice addition, subtraction, multiplication, division, vocabulary, spelling, and grammar."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does Critter Quest require an account or login?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No account or login is required to use Critter Quest. Families create local profiles directly in the app and all progress is saved automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What math skills does Critter Quest teach?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Critter Quest teaches addition, subtraction, multiplication, and division. Kindergarten covers sums up to 10 and non-negative differences. 3rd grade covers addition up to 500, subtraction up to 999, multiplication tables 1–12, and division with whole number quotients."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What reading skills does Critter Quest teach?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Critter Quest reading quests cover sight words (Dolch list), letter sounds, CVC word building for kindergartners, and vocabulary, spelling, and grammar for 3rd graders."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can parents track their child's progress on Critter Quest?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Each child profile tracks total correct answers, sessions completed, best streak, and coins earned. Parents can also manage a reward store with a PIN-protected parent hub."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What devices does Critter Quest work on?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Critter Quest works on any device with a modern web browser — desktop, laptop, tablet, or phone. No app download is needed. Just visit critterquest.org."
+        }
+      }
+    ]
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
@@ -107,6 +181,24 @@
   <footer class="app-footer">
     <a href="mailto:contact@critterquest.org">contact@critterquest.org</a>
   </footer>
+
+  <!-- SEO/AEO: crawlable content for search and AI engines (visually hidden) -->
+  <section aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+    <h1>Critter Quest — Free Math and Reading Practice for Kids</h1>
+    <p>Critter Quest is a free, browser-based educational app for kindergarten and 3rd grade students. Children practice math and reading by completing quests and earning virtual coins and collectible critter cards. No account, login, or download required. Works on any device.</p>
+    <h2>Math Practice</h2>
+    <p>Kindergarten math: addition with sums up to 10, subtraction with non-negative differences. 3rd grade math: addition up to 500, subtraction up to 999, multiplication tables 1 through 12, division with whole number quotients. Each session has 10 questions with step-by-step scaffolding to guide kids through the problem-solving process.</p>
+    <h2>Reading Practice</h2>
+    <p>Kindergarten reading: Dolch sight words, letter sounds, CVC word building. 3rd grade reading: vocabulary with definitions, spelling of commonly misspelled words, grammar questions. Reading quests use multiple-choice format with 10 questions per session.</p>
+    <h2>How It Works</h2>
+    <p>Kids select a profile, choose a quest (math or reading), pick an operation or category, and answer 10 questions. Correct answers earn coins. At the end of each session, kids receive a collectible critter card based on their chosen animal theme. Cards have five rarity levels: common, uncommon, rare, epic, and legendary.</p>
+    <h2>Animal Themes</h2>
+    <p>Choose from five animal themes: forest animals, ocean animals, farm animals, jungle animals, and arctic animals. Each theme features unique collectible critter cards and a personalized mascot.</p>
+    <h2>Parent Features</h2>
+    <p>Parents can set up a reward store with custom items kids can buy with earned coins. A PIN-protected parent hub provides access to store management. Multiple child profiles are supported on a single device, making it ideal for families.</p>
+    <h2>Free Educational App for Elementary Students</h2>
+    <p>Critter Quest was built for elementary school students in kindergarten through 3rd grade. It is particularly well-suited for students in the West Ada School District in Ada County, Idaho, but is used by families and teachers everywhere. The app is completely free with no ads, no subscriptions, and no in-app purchases.</p>
+  </section>
 
   <!-- ── Modal overlay ── -->
   <div id="modal-overlay" class="modal-overlay" style="display:none">
